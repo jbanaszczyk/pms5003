@@ -6,8 +6,7 @@ Arduino library supporting  PMS5003 Air Quality Sensor.
 * Probably works fine with PMS7003 and PMS3003,
 * Highly customizable:
   * Uses any serial communication library,
-  * You hava a choice to use or not to use: global variables or objects instant
+  * You have a choice to use or not to use: global variables or class instances,
+  * You have a choice to use or not to use: C++ namespaces,  
 * Written from scratch,
 * Written in modern C++,
-
-
