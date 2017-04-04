@@ -26,9 +26,8 @@
 
 // Undef to use modern min() template function instead of min() macro. I hate unnecessary macros.
 // Works only with Visual Studio (compiler errors with Arduino IDE).
-// There is minimal in code size.
 
-#define NOMINMAX
+// #define NOMINMAX
 
 ////////////////////////////////////////////
 //////////////////////////////////////////// Final check for consistency

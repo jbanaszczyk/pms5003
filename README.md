@@ -16,7 +16,8 @@ I'm proud to present my Arduino library supporting PMS5003 Air Quality Sensor.
 
 Install pms5003 library.
 
-Let's use [DrDiettrich' fork of AltSerial Library](https://github.com/DrDiettrich/AltSoftSerial.git). Install it.
+Let's use [DrDiettrich' fork of AltSoftSerial Library](https://github.com/DrDiettrich/AltSoftSerial.git). Install it. 
+* pms5003 will not compile using original AltSoftSerial lib.
 
 Make some connections:
 * Important: pms5003 uses 3.3V logic. Make sure your Arduino board uses 3.3V logic too, use converters if required.
@@ -29,7 +30,7 @@ Make some connections:
 
 ### Hello. The Basic scenario.
 
-Use the code:
+Use the code: https://github.com/jbanaszczyk/pms5003/tree/master/examples/01_Simple
 
 ```C++
 #include <Arduino.h>
@@ -55,7 +56,7 @@ auto lastRead = millis();
 
 void loop(void) {
 
-	const int n = Pms5003::Reserved;
+	const auto n = Pms5003::Reserved;
 	Pms5003::pmsData data[n];
 
 	Pms5003::PmsStatus status = pms.read(data, n);
