@@ -1,4 +1,5 @@
 #include <Arduino.h>
+
 #include <pms.h>
 
 Pms5003 pms;
@@ -35,7 +36,9 @@ void loop(void) {
 			Serial.println(newRead - lastRead);
 			lastRead = newRead;
 
-			for (size_t i = Pms5003::PM1dot0; i < n; ++i) {
+			// For loop starts from 3
+			// Skip the first three data (PM1dot0CF1, PM2dot5CF1, PM10CF1)
+			for (size_t i = Pms5003::PM1dot0; i < n; ++i) { 
 				Serial.print(data[i]);
 				Serial.print("\t");
 				Serial.print(Pms5003::dataNames[i]);

@@ -91,7 +91,7 @@ size_t Pms5003::available(void) {
 	return static_cast<size_t>(pmsSerial.available());
 }
 
-Pms5003::PmsStatus Pms5003::read(pmsData *data, const size_t nData, const pmsData dataSize) {
+Pms5003::PmsStatus Pms5003::read(pmsData *data, const size_t nData, const uint8_t dataSize) {
 
 	if (available() < (dataSize + 2) * sizeof(pmsData) + sizeof(sig)) {
 		return noData;
@@ -115,7 +115,7 @@ Pms5003::PmsStatus Pms5003::read(pmsData *data, const size_t nData, const pmsDat
 	}
 	sumBuffer(&sum, thisFrameLen);
 
-	const pmsData maxFrameLen = 2 * 0x1c;    // arbitrary
+	const decltype(thisFrameLen) maxFrameLen{ 2 * 0x1c };    // arbitrary
 
 	swapEndianBig16(&thisFrameLen);
 	if (thisFrameLen > maxFrameLen) {
@@ -163,12 +163,22 @@ void Pms5003::flushInput(void) {
 
 bool Pms5003::waitForData(const unsigned int maxTime, const size_t nData) {
 	const auto t0 = millis();
+	if (nData == 0) {
+		for (; (millis() - t0) < maxTime; delay(1)) {
+			if (pmsSerial.available()) {
+				return true;
+			}
+		}
+		return pmsSerial.available();
+	}
+
 	for (; (millis() - t0) < maxTime; delay(1)) {
 		if (available() >= nData) {
 			return true;
 		}
 	}
-	return (available() >= nData);
+	return available() >= nData;
+
 }
 
 bool Pms5003::write(const PmsCmd cmd) {

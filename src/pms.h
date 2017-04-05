@@ -22,13 +22,11 @@ private:
 	tribool passive;
 	tribool sleep;
 	unsigned long timeout;
-	static const decltype(timeout) timeoutPassive = 68;  // Transfer time of 32data + 1stop + 1start using 9600bps is 33 usec. timeoutPassive could be at least 34, Value of 68 is an arbitrary doubled
+	static const decltype(timeout) timeoutPassive = 68;  // Transfer time of 1start + 32data + 1stop using 9600bps is 33 usec. timeoutPassive could be at least 34, Value of 68 is an arbitrary doubled
 	static const auto ackTimeout = 30;                   // Time to complete response after write command
 
 #if defined PMS_ALTSOFTSERIAL
 	AltSoftSerial pmsSerial;
-#elif defined PMS_SOFTSERIAL
-#error "Pms5003 serial library not defined"
 #endif  
 
 public:
@@ -54,10 +52,10 @@ public:
 	enum PmsDataNames : uint8_t {
 		PM1dot0CF1 = 0,
 		PM2dot5CF1,
-		PM10CF1,
+		PM10dot0CF1,
 		PM1dot0,
 		PM2dot5,
-		PM10,
+		PM10dot0,
 		Particles0dot3,
 		Particles0dot5,
 		Particles1dot0,
@@ -82,9 +80,9 @@ public:
 	void end(void);
 	size_t available(void);
 	void flushInput(void);
-	PmsStatus read(pmsData *data, const size_t nData, const pmsData dataSize = nValues_PmsDataNames);
+	PmsStatus read(pmsData *data, const size_t nData, const uint8_t dataSize = nValues_PmsDataNames);
 	bool write(const PmsCmd cmd);
-	bool waitForData(const unsigned int maxTime, const size_t nData = 1);
+	bool waitForData(const unsigned int maxTime, const size_t nData = 0);
 };
 
 #endif
