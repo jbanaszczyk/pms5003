@@ -3,7 +3,7 @@
 
 ////////////////////////////////////////
 
-#if ! defined NOMINMAX
+#if defined NOMINMAX
 
 #if defined min
 #undef min
@@ -178,7 +178,6 @@ bool Pms5003::waitForData(const unsigned int maxTime, const size_t nData) {
 		}
 	}
 	return available() >= nData;
-
 }
 
 bool Pms5003::write(const PmsCmd cmd) {
@@ -204,24 +203,7 @@ bool Pms5003::write(const PmsCmd cmd) {
 		return false;
 	}
 
-	if ((cmd != cmdReadData) && (cmd != cmdWakeup)) {
-		const auto responseFrameSize = 8;
-		if (!waitForData(ackTimeout, responseFrameSize)) {
-			pmsSerial.flushInput();
-			return false;
-		}
-		Pms5003::pmsData response = 0xCCCC;
-		if (read(&response, 1, 1) != OK) {
-			return false;
-		}
-		if ((response >> 8) != (cmd & 0xFF)) {
-			return false;
-		}
-	}
-
 	switch (cmd) {
-		case cmdReadData:
-			break;
 		case cmdModePassive:
 			passive = tribool(true);
 			break;
@@ -237,9 +219,44 @@ bool Pms5003::write(const PmsCmd cmd) {
 			// waitForData(wakeupTime);
 			break;
 		default:
-			return false;
+			break;
 	}
+	if ((cmd != cmdReadData) && (cmd != cmdWakeup)) {
+		const auto responseFrameSize = 8;
+		if (!waitForData(ackTimeout, responseFrameSize)) {
+			pmsSerial.flushInput();
+			return true;
+		}
+		Pms5003::pmsData response = 0xCCCC;
+		read(&response, 1, 1);
+	}
+
+	/*
+		if ((cmd != cmdReadData) && (cmd != cmdWakeup)) {
+			const auto responseFrameSize = 8;
+			if (!waitForData(ackTimeout, responseFrameSize)) {
+				pmsSerial.flushInput();
+				return false;
+			}
+			Pms5003::pmsData response = 0xCCCC;
+			if (read(&response, 1, 1) != OK) {
+				return false;
+			}
+			if ((response >> 8) != (cmd & 0xFF)) {
+				return false;
+			}
+		}
+	*/
+
 	return true;
+}
+
+const char *Pms5003::getMetrics(const pmsIdx idx) {
+	return idx < nValues_PmsDataNames ? Pms5003::metrics[idx] : "???";
+}
+
+const char *Pms5003::getDataNames(const pmsIdx idx) {
+	return idx < nValues_PmsDataNames ? Pms5003::dataNames[idx] : "???";
 }
 
 const char * Pms5003::errorMsg[nValues_PmsStatus]{
@@ -266,7 +283,7 @@ const char *Pms5003::metrics[]{
 	"/0.1L",
 	"/0.1L",
 
-	"?"
+	"???"
 };
 
 const char *Pms5003::dataNames[]{

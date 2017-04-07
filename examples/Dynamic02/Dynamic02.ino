@@ -37,26 +37,30 @@ auto lastRead = millis();
 
 void loop(void) {
 
-	const auto n = Pms5003::nValues_PmsDataNames;
+	const Pms5003::pmsIdx n = Pms5003::nValues_PmsDataNames;
 	Pms5003::pmsData data[n];
 
+	auto t0Read = millis();
 	Pms5003::PmsStatus status = pms.read(data, n);
+	auto t1Read = millis();
 
 	switch (status) {
 		case Pms5003::OK:
 		{
-			Serial.println("_________________");
+			Serial.print("_________________ time of read(): ");
+			Serial.print(t1Read - t0Read);
+			Serial.println(" msec");
 			auto newRead = millis();
 			Serial.print("Wait time ");
 			Serial.println(newRead - lastRead);
 			lastRead = newRead;
 
-			for (size_t i = 0; i < n; ++i) { 
+			for (Pms5003::pmsIdx i = 0; i < n; ++i) {
 				Serial.print(data[i]);
 				Serial.print("\t");
-				Serial.print(Pms5003::dataNames[i]);
+				Serial.print(Pms5003::getDataNames(i));
 				Serial.print(" [");
-				Serial.print(Pms5003::metrics[i]);
+				Serial.print(Pms5003::getMetrics(i));
 				Serial.print("]");
 				Serial.println();
 			}

@@ -135,6 +135,16 @@ Type of single data received from the sensor.
 
 _Shown in_: [Basic scenario](#Hello)
 
+### pmsIdx<a name="API_pmsIdx"></a>
+```C++
+typedef uint8_t pmsIdx;
+```
+Underlying type of [PmsDataNames](#API_PmsDataNames), suitable for declaring size of array receiving data from the sensor or to iterate over it.
+
+_Shown in_: [Second example](https://github.com/jbanaszczyk/pms5003/blob/master/examples/Dynamic02/Dynamic02.ino)
+
+You can use any unsigned int type instead. _As shown in_: [Basic scenario](#Hello)
+
 ## Enums
 
 ### PmsStatus<a name="API_PmsStatus"></a>
@@ -159,21 +169,21 @@ _Shown in_: [Basic scenario](#Hello)
 
 ### PmsDataNames<a name="API_PmsDataNames"></a>
 ```C++
-enum PmsDataNames : uint8_t {
-	PM1dot0CF1 = 0,
-	PM2dot5CF1,
-	PM10dot0CF1,
-	PM1dot0,
-	PM2dot5,
-	PM10dot0,
-	Particles0dot3,
-	Particles0dot5,
-	Particles1dot0,
-	Particles2dot5,
-	Particles5dot0,
-	Particles10,
-	Reserved,
-	nValues_PmsDataNames
+enum PmsDataNames : pmsIdx {
+	PM1dot0CF1 = 0,       //  0
+	PM2dot5CF1,           //  1
+	PM10dot0CF1,          //  2
+	PM1dot0,              //  3
+	PM2dot5,              //  4
+	PM10dot0,             //  5
+	Particles0dot3,       //  6
+	Particles0dot5,       //  7
+	Particles1dot0,       //  8
+	Particles2dot5,       //  9
+	Particles5dot0,       // 10
+	Particles10,          // 11
+	Reserved,             // 12
+	nValues_PmsDataNames  // 13
 };
 ```
 
@@ -218,6 +228,16 @@ Human readable names of [PmsDataNames](#API_PmsDataNames). Use PmsDataNames as a
 
 _Shown in_: [Basic scenario](#Hello)
 
+#### getDataNames<a name="API_getDataNames"></a>
+```Cpp
+const char *Pms5003::getDataNames(const uint8_t idx);
+Serial.print(Pms5003::getDataNames(i)); // instead of Serial.print(Pms5003::dataNames[i]);
+```
+
+There is provided range-safe function to access dataNames values: getDataNames();
+
+_Shown in_: [Second example](https://github.com/jbanaszczyk/pms5003/blob/master/examples/Dynamic02/Dynamic02.ino)
+
 ### metrics<a name="API_metrics"></a>
 ```C++
 static const char *metrics[];
@@ -227,6 +247,15 @@ Metrics associated with PmsDataNames. Use PmsDataNames as an index.
 
 _Shown in_: [Basic scenario](#Hello)
 
+#### getMetrics<a name="API_getMetrics"></a>
+```Cpp
+const char *Pms5003::getMetrics(const uint8_t idx);
+Serial.print(Pms5003::getMetrics(i)); // instead of Serial.print(Pms5003::metrics[i]);
+```
+
+There is provided range-safe function to access metrics values: getMetrics();
+
+_Shown in_: [Second example](https://github.com/jbanaszczyk/pms5003/blob/master/examples/Dynamic02/Dynamic02.ino)
 
 ## Methods
 
@@ -362,7 +391,7 @@ bool write(const PmsCmd cmd);
 
 It sends a command to PMS5003 sensor. Refer to [commands section](#Commands).
 
-PMS5003 responds to some of the commands. The response is gathered and verified be the write() function internally. That is the reason, that write() can block.
+PMS5003 responds to some [commands](#commands). The response is gathered and verified be the write() internally. That is the reason, that write() can block.
 
 Arguments:
 * cmd: one of [PmsCmd](#API_PmsCmd)
@@ -374,24 +403,43 @@ _Shown in_: [Basic scenario](#Hello)
 
 ## Consts
 
+### ackTimeout<a name="API_ackTimeout"></a>
+
+```C++
+private: static const auto ackTimeout = 30U;
+```
+
+Used internally (inside write()). Defines timeout for response read after write command. 
+
+write() can block up to ackTimeout.
+
 ### wakeupTime<a name="API_wakeupTime"></a>
 
 ```C++
 static const auto wakeupTime = 2500U;
 ```
 
-### ackTimeout<a name="API_ackTimeout"></a>
+wakeupTime defines time after power on, reset or write(cmdWakeup) when the sensor is blind for any commands. 
 
-```C++
-static const auto ackTimeout = 30;
-```
+_Shown in_: [Basic scenario](#Hello)
 
-###
+## Commands and states<a name="commands"></a>
+
+PMS5003 accepts a few commands. They are not fully documented. 
+
+You can send commands to the PMS5003 sensor using [write()](#API_write).
+
+|From State|input                |To State  |Output                                |
+|----------|---------------------|----------|--------------------------------------|
+|[Any]     |Power on             |Active    |Spontaneously sends data frames       |
+|[Any]     |write(cmdWakeup)     |Active    |Spontaneously sends data frames       |
+|[Any]     |write(cmdSleep)      |Sleep     |None (waits for cmdWakeup)            |
+|Active    |write(cmdModePassive)|Passive   |None                                  |
+|Passive   |write(cmdModeActive) |Active    |Spontaneously sends data frames       |
+|Passive   |write(cmdReadData)   |Passive   |Sends single data frame               |
 
 
 
-
-# Commands <a name="Commands"></a>
 
 # Configuration <a name="Cfg_PMS_DYNAMIC"></a>
 
