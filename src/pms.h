@@ -2,7 +2,7 @@
 #ifndef _PMS_H_
 #define _PMS_H_
 
-#include <arduino.h>
+#include <Arduino.h>
 #include <tribool.h>
 #include <pmsConfig.h>
 

@@ -1,7 +1,7 @@
 #ifndef _tribool_h_
 #define _tribool_h_
 
-#include <arduino.h>
+#include <Arduino.h>
 
 class tribool;
 
