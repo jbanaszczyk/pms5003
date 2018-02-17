@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{C5F80730-F44F-4478-BDAE-6634EFC2CA88}</ProjectGuid>
+    <ProjectGuid>{64B4D7FE-3A88-4E46-9686-77DD3B31B318}</ProjectGuid>
     <RootNamespace>Dynamic02</RootNamespace>
     <ProjectName>Dynamic02</ProjectName>
   </PropertyGroup>
