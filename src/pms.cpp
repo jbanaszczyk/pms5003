@@ -8,8 +8,8 @@
 #if defined min
 #undef min
 #endif
-template <class T>
-inline const T& __attribute__((always_inline)) min(const T& a, const T& b) {
+template <class T> inline const T& __attribute__((always_inline)) min(const T& a, const T& b);
+template <class T> inline const T& __attribute__((always_inline)) min(const T& a, const T& b) {
 	return !(b < a) ? a : b;
 }
 
@@ -294,12 +294,12 @@ const char *Pms5003::dataNames[]{
 	"PM2.5",
 	"PM10.",
 
-	"Particles < 0.3 micron",
-	"Particles < 0.5 micron",
-	"Particles < 1.0 micron",
-	"Particles < 2.5 micron",
-	"Particles < 5.0 micron",
-	"Particles < 10. micron",
+	"Particles > 0.3 micron",
+	"Particles > 0.5 micron",
+	"Particles > 1.0 micron",
+	"Particles > 2.5 micron",
+	"Particles > 5.0 micron",
+	"Particles > 10. micron",
 
 	"Reserved_0"
 };

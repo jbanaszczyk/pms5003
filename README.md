@@ -102,11 +102,11 @@ Wait time 836
 8	PM2.5 [mcg/m3]
 8	PM10. [mcg/m3]
 1368	Particles < 0.3 micron [/0.1L]
-361	Particles < 0.5 micron [/0.1L]
-43	Particles < 1.0 micron [/0.1L]
-1	Particles < 2.5 micron [/0.1L]
-0	Particles < 5.0 micron [/0.1L]
-0	Particles < 10. micron [/0.1L]
+361	Particles > 0.5 micron [/0.1L]
+43	Particles > 1.0 micron [/0.1L]
+1	Particles > 2.5 micron [/0.1L]
+0	Particles > 5.0 micron [/0.1L]
+0	Particles > 10. micron [/0.1L]
 ```
 
 # API<a name="API"></a>
