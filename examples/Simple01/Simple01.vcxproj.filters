@@ -17,9 +17,4 @@
   <ItemGroup>
     <None Include="Simple01.ino" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="__vm\.Simple01.vsarduino.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
 </Project>
