@@ -74,23 +74,23 @@ public:
 	static const char *dataNames[nValues_PmsDataNames];
 	static const char *metrics[nValues_PmsDataNames];
 
-	static const char *getMetrics (const pmsIdx idx);
-	static const char *getDataNames (const pmsIdx idx);
+	static const char *getMetrics(const pmsIdx idx);
+	static const char *getDataNames(const pmsIdx idx);
 
-	void setTimeout (const decltype(timeout) timeout);
-	decltype(timeout) getTimeout (void) const;
+	void setTimeout(const decltype(timeout) timeout);
+	decltype(timeout) getTimeout(void) const;
 
 	static const auto wakeupTime = 2500U;    // Experimentally, time to get ready after reset/wakeup
 
-	Pms5003 ();
-	~Pms5003 ();
-	bool begin (void);
-	void end (void);
-	size_t available (void);
-	void flushInput (void);
-	PmsStatus read (pmsData *data, const size_t nData, const uint8_t dataSize = nValues_PmsDataNames);
-	bool write (const PmsCmd cmd);
-	bool waitForData (const unsigned int maxTime, const size_t nData = 0);
+	Pms5003();
+	~Pms5003();
+	bool begin(void);
+	void end(void);
+	size_t available(void);
+	void flushInput(void);
+	PmsStatus read(pmsData *data, const size_t nData, const uint8_t dataSize = nValues_PmsDataNames);
+	bool write(const PmsCmd cmd);
+	bool waitForData(const unsigned int maxTime, const size_t nData = 0);
 };
 
 #endif
