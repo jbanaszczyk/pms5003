@@ -85,6 +85,9 @@
       <FileType>CppCode</FileType>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="__vm\.Simple01.vsarduino.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

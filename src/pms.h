@@ -42,6 +42,10 @@ public:
 
 	static const char *errorMsg[nValues_PmsStatus];
 
+#if ! defined __INT24_MAX__
+	using  __uint24 = uint32_t;
+#endif
+
 	enum PmsCmd : __uint24 {
 		cmdReadData = 0x0000e2L,
 		cmdModePassive = 0x0000e1L,
