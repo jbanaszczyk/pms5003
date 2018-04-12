@@ -122,7 +122,7 @@ Pms5003::PmsStatus Pms5003::read(pmsData *data, const size_t nData, const uint8_
 		return frameLenMismatch;
 	}
 
-	size_t toRead{ min(size_t(thisFrameLen - 2), nData * sizeof(pmsData)) };
+	size_t toRead{ min(thisFrameLen - 2, nData * sizeof(pmsData)) };
 	if (data == nullptr) {
 		toRead = 0;
 	}
