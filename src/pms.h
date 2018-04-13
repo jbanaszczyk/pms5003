@@ -10,7 +10,7 @@
 // Pin 1: Vcc
 // Pin 2: GND
 
-// Using SoftSerial:
+// Using AltSoftSerial:
 //   Pin 4: Digital pin 9 (there is no choice) 
 //   Pin 5: Digital pin 8 (there is no choice)
 

@@ -45,31 +45,31 @@ void loop(void) {
 	auto t1Read = millis();
 
 	switch (status) {
-		case Pms5003::OK:
-		{
-			Serial.print("_________________ time of read(): ");
-			Serial.print(t1Read - t0Read);
-			Serial.println(" msec");
-			auto newRead = millis();
-			Serial.print("Wait time ");
-			Serial.println(newRead - lastRead);
-			lastRead = newRead;
+	case Pms5003::OK:
+	{
+		Serial.print("_________________ time of read(): ");
+		Serial.print(t1Read - t0Read);
+		Serial.println(" msec");
+		auto newRead = millis();
+		Serial.print("Wait time ");
+		Serial.println(newRead - lastRead);
+		lastRead = newRead;
 
-			for (Pms5003::pmsIdx i = 0; i < n; ++i) {
-				Serial.print(data[i]);
-				Serial.print("\t");
-				Serial.print(Pms5003::getDataNames(i));
-				Serial.print(" [");
-				Serial.print(Pms5003::getMetrics(i));
-				Serial.print("]");
-				Serial.println();
-			}
-			break;
+		for (Pms5003::pmsIdx i = 0; i < n; ++i) {
+			Serial.print(data[i]);
+			Serial.print("\t");
+			Serial.print(Pms5003::getDataNames(i));
+			Serial.print(" [");
+			Serial.print(Pms5003::getMetrics(i));
+			Serial.print("]");
+			Serial.println();
 		}
-		case Pms5003::noData:
-			break;
-		default:
-			Serial.println("_________________");
-			Serial.println(Pms5003::errorMsg[status]);
+		break;
+	}
+	case Pms5003::noData:
+		break;
+	default:
+		Serial.println("_________________");
+		Serial.println(Pms5003::errorMsg[status]);
 	};
 }

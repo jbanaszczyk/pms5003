@@ -84,7 +84,8 @@ size_t Pms5003::available(void) {
 	while (pmsSerial.available()) {
 		if (pmsSerial.peek() != sig[0]) {
 			pmsSerial.read();
-		} else {
+		}
+		else {
 			break;
 		}
 	}
@@ -204,22 +205,22 @@ bool Pms5003::write(const PmsCmd cmd) {
 	}
 
 	switch (cmd) {
-		case cmdModePassive:
-			passive = tribool(true);
-			break;
-		case cmdModeActive:
-			passive = tribool(false);
-			break;
-		case cmdSleep:
-			sleep = tribool(true);
-			break;
-		case cmdWakeup:
-			sleep = tribool(false);
-			passive = tribool(false);
-			// waitForData(wakeupTime);
-			break;
-		default:
-			break;
+	case cmdModePassive:
+		passive = tribool(true);
+		break;
+	case cmdModeActive:
+		passive = tribool(false);
+		break;
+	case cmdSleep:
+		sleep = tribool(true);
+		break;
+	case cmdWakeup:
+		sleep = tribool(false);
+		passive = tribool(false);
+		// waitForData(wakeupTime);
+		break;
+	default:
+		break;
 	}
 	if ((cmd != cmdReadData) && (cmd != cmdWakeup)) {
 		const auto responseFrameSize = 8;

@@ -17,4 +17,9 @@
   <ItemGroup>
     <None Include="Dynamic02.ino" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="__vm\.Dynamic02.vsarduino.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>
