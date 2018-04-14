@@ -29,7 +29,7 @@ void setup(void) {
 	pms_ = new Pms5003(&pmsSerial);
 #else
 	pms.begin();
-#endif 
+#endif
 
 	pms.write(Pms5003::cmdWakeup);
 	pms.write(Pms5003::cmdModeActive);
@@ -51,8 +51,7 @@ void loop(void) {
 	const auto t1Read = millis();
 
 	switch (status) {
-	case Pms5003::OK:
-	{
+	case Pms5003::OK: {
 		Serial.print("_________________ time of read(): ");
 		Serial.print(t1Read - t0Read);
 		Serial.println(" msec");

@@ -19,7 +19,7 @@ void setup(void) {
 	Serial.println("PMS5003");
 
 	pms.begin();
-	pms.write(Pms5003::cmdWakeup);	
+	pms.write(Pms5003::cmdWakeup);
 	pms.write(Pms5003::cmdModeActive);
 	pms.waitForData(Pms5003::wakeupTime);
 }
@@ -37,8 +37,7 @@ void loop(void) {
 	const Pms5003::PmsStatus status = pms.read(data, n);
 
 	switch (status) {
-	case Pms5003::OK:
-	{
+	case Pms5003::OK: {
 		Serial.println("_________________");
 		const auto newRead = millis();
 		Serial.print("Wait time ");
