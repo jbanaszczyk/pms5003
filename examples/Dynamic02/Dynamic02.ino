@@ -22,7 +22,7 @@ Pms5003 pms(&pmsSerial);
 void setup(void) {
 	// ReSharper restore CppInconsistentNaming
 	Serial.begin(115200);
-	while (!Serial) {};
+	while (!Serial) {}
 	Serial.println("PMS5003");
 
 #if defined PMS_DYNAMIC
@@ -76,5 +76,5 @@ void loop(void) {
 	default:
 		Serial.println("_________________");
 		Serial.println(Pms5003::errorMsg[status]);
-	};
+	}
 }

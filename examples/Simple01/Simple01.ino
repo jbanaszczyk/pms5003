@@ -15,7 +15,7 @@ Pms5003 pms(&pmsSerial);
 // ReSharper disable once CppInconsistentNaming
 void setup(void) {
 	Serial.begin(115200);
-	while (!Serial) {};
+	while (!Serial) {}
 	Serial.println("PMS5003");
 
 	pms.begin();
@@ -62,5 +62,5 @@ void loop(void) {
 	default:
 		Serial.println("_________________");
 		Serial.println(Pms5003::errorMsg[status]);
-	};
+	}
 }
