@@ -72,8 +72,8 @@ void Pms5003::addSerial(IPmsSerial* pmsSerial) {
 }
 
 bool Pms5003::begin(void) {
-	pmsSerial->setTimeout(Pms5003::timeoutPassive);
-	return pmsSerial->begin(Pms5003::baud);
+	pmsSerial->setTimeout(Pms5003::TIMEOUT_PASSIVE);
+	return pmsSerial->begin(Pms5003::BAUD_RATE);
 }
 
 void Pms5003::end(void) {
@@ -90,38 +90,37 @@ decltype(Pms5003::timeout) Pms5003::getTimeout(void) const {
 }
 
 size_t Pms5003::available(void) {
-	while (pmsSerial->available()) {
-		if (pmsSerial->peek() != sig[0]) {
-			pmsSerial->read();
-		}
-		else {
-			break;
-		}
+	while ((pmsSerial->available()) && (pmsSerial->peek() != sig[0])) {
+		pmsSerial->read();
 	}
 	return pmsSerial->available();
 }
 
-Pms5003::PmsStatus Pms5003::read(pmsData *data, const size_t nData, const uint8_t dataSize) {
+Pms5003::PmsStatus Pms5003::read(pmsData_t *data, const size_t nData, const uint8_t dataSize) {
 
-	if (available() < (dataSize + 2) * sizeof(pmsData) + sizeof(sig)) {
-		return NO_DATA;
+	while ((pmsSerial->available()) && (pmsSerial->peek() != sig[0])) {
+		pmsSerial->read();
+	}
+
+	if (available() < (dataSize + 2) * sizeof(pmsData_t) + sizeof(sig)) {
+		return PmsStatus{ PmsStatus::NO_DATA };
 	}
 
 	pmsSerial->read(); // Value is equal to sig[0]. There is no need to check the value, it was checked by prior peek()
 
 	if (pmsSerial->read() != sig[1]) // The rest of the buffer will be invalidated during the next read attempt
-		return READ_ERROR;
+		return PmsStatus{ PmsStatus::READ_ERROR };
 
 	uint16_t sum{ 0 };
 	sumBuffer(&sum, (uint8_t *)&sig, sizeof(sig));
 
-	pmsData thisFrameLen{ 0x1c };
+	pmsData_t thisFrameLen{ 0x1c };
 	if (pmsSerial->read((uint8_t*)&thisFrameLen, sizeof(thisFrameLen)) != sizeof(thisFrameLen)) {
-		return READ_ERROR;
+		return PmsStatus{ PmsStatus::READ_ERROR };
 	};
 
 	if (thisFrameLen % 2 != 0) {
-		return FRAME_LENGTH_MISMATCH;
+		return PmsStatus{ PmsStatus::FRAME_LENGTH_MISMATCH };
 	}
 	sumBuffer(&sum, thisFrameLen);
 
@@ -129,17 +128,17 @@ Pms5003::PmsStatus Pms5003::read(pmsData *data, const size_t nData, const uint8_
 
 	swapEndianBig16(&thisFrameLen);
 	if (thisFrameLen > maxFrameLen) {
-		return FRAME_LENGTH_MISMATCH;
+		return PmsStatus{ PmsStatus::FRAME_LENGTH_MISMATCH };
 	}
 
-	size_t toRead{ min(thisFrameLen - 2, nData * sizeof(pmsData)) };
+	size_t toRead{ min(thisFrameLen - 2, nData * sizeof(pmsData_t)) };
 	if (data == nullptr) {
 		toRead = 0;
 	}
 
 	if (toRead) {
 		if (pmsSerial->read((uint8_t*)data, toRead) != toRead) {
-			return READ_ERROR;
+			return PmsStatus{ PmsStatus::READ_ERROR };
 		}
 		sumBuffer(&sum, (uint8_t*)data, toRead);
 
@@ -148,10 +147,10 @@ Pms5003::PmsStatus Pms5003::read(pmsData *data, const size_t nData, const uint8_
 		}
 	}
 
-	pmsData crc;
+	pmsData_t crc;
 	for (; toRead < thisFrameLen; toRead += 2) {
 		if (pmsSerial->read((uint8_t*)&crc, sizeof(crc)) != sizeof(crc)) {
-			return READ_ERROR;
+			return PmsStatus{ PmsStatus::READ_ERROR };
 		};
 
 		if (toRead < thisFrameLen - 2) {
@@ -162,10 +161,10 @@ Pms5003::PmsStatus Pms5003::read(pmsData *data, const size_t nData, const uint8_
 	swapEndianBig16(&crc);
 
 	if (sum != crc) {
-		return SUM_ERROR;
+		return PmsStatus{ PmsStatus::SUM_ERROR };
 	}
 
-	return OK;
+	return PmsStatus{ PmsStatus::OK };
 }
 
 void Pms5003::flushInput(void) {
@@ -194,7 +193,7 @@ bool Pms5003::waitForData(const unsigned int maxTime, const size_t nData) {
 bool Pms5003::write(const PmsCmd cmd) {
 	static_assert(sizeof(cmd) >= 3, "Wrong definition of PmsCmd (too short)");
 
-	if ((cmd != cmdReadData) && (cmd != cmdWakeup)) {
+	if ((cmd != PmsCmd::CMD_READ_DATA) && (cmd != PmsCmd::CMD_WAKEUP)) {
 		flushInput();
 	}
 
@@ -215,42 +214,42 @@ bool Pms5003::write(const PmsCmd cmd) {
 	}
 
 	switch (cmd) {
-	case cmdModePassive:
+	case PmsCmd::CMD_MODE_PASSIVE:
 		passive = tribool(true);
 		break;
-	case cmdModeActive:
+	case PmsCmd::CMD_MODE_ACTIVE:
 		passive = tribool(false);
 		break;
-	case cmdSleep:
+	case PmsCmd::CMD_SLEEP:
 		sleep = tribool(true);
 		break;
-	case cmdWakeup:
+	case PmsCmd::CMD_WAKEUP:
 		sleep = tribool(false);
 		passive = tribool(false);
-		// waitForData(wakeupTime);
+		// waitForData(WAKEUP_TIME);
 		break;
 	default:
 		break;
 	}
-	if ((cmd != cmdReadData) && (cmd != cmdWakeup)) {
+	if ((cmd != PmsCmd::CMD_READ_DATA) && (cmd != PmsCmd::CMD_WAKEUP)) {
 		const auto responseFrameSize = 8;
-		if (!waitForData(ackTimeout, responseFrameSize)) {
+		if (!waitForData(TIMEOUT_ACK, responseFrameSize)) {
 			pmsSerial->flushInput();
 			return true;
 		}
-		Pms5003::pmsData response = 0xCCCC;
+		Pms5003::pmsData_t response = 0xCCCC;
 		read(&response, 1, 1);
 	}
 
 	/*
-		if ((cmd != cmdReadData) && (cmd != cmdWakeup)) {
+		if ((cmd != CMD_READ_DATA) && (cmd != CMD_WAKEUP)) {
 			const auto responseFrameSize = 8;
-			if (!waitForData(ackTimeout, responseFrameSize)) {
+			if (!waitForData(TIMEOUT_ACK, responseFrameSize)) {
 				pmsSerial->flushInput();
 				return false;
 			}
-			Pms5003::pmsData response = 0xCCCC;
-			if (read(&response, 1, 1) != OK) {
+			Pms5003::pmsData_t response = 0xCCCC;
+			if (read(&response, 1, 1) != PmsStatus::OK) {
 				return false;
 			}
 			if ((response >> 8) != (cmd & 0xFF)) {
@@ -262,20 +261,21 @@ bool Pms5003::write(const PmsCmd cmd) {
 	return true;
 }
 
-const char *Pms5003::getMetrics(const pmsIdx idx) {
-	return idx < nValues_PmsDataNames ? Pms5003::metrics[idx] : "???";
+const char *Pms5003::getMetrics(const pmsIdx_t idx) {
+	return idx < N_VALUES_PMSDATANAMES ? Pms5003::metrics[idx] : "???";
 }
 
-const char *Pms5003::getDataNames(const pmsIdx idx) {
-	return idx < nValues_PmsDataNames ? Pms5003::dataNames[idx] : "???";
+const char *Pms5003::getDataNames(const pmsIdx_t idx) {
+	return idx < N_VALUES_PMSDATANAMES ? Pms5003::dataNames[idx] : "???";
 }
 
-const char * Pms5003::errorMsg[N_VALUES_PMSSTATUS]{
+const char * Pms5003::PmsStatus::errorMsg[]{
 	"OK",
-	"NO_DATA",
-	"READ_ERROR",
-	"FRAME_LENGTH_MISMATCH",
-	"SUM_ERROR"
+	"No data",
+	"Read error",
+	"Frame length mismatch",
+	"CRC Error",
+	"Status:unknown"
 };
 
 const char *Pms5003::metrics[]{

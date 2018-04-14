@@ -31,9 +31,9 @@ void setup(void) {
 	pms.begin();
 #endif
 
-	pms.write(Pms5003::cmdWakeup);
-	pms.write(Pms5003::cmdModeActive);
-	pms.waitForData(Pms5003::wakeupTime);
+	pms.write(Pms5003::CMD_WAKEUP);
+	pms.write(Pms5003::CMD_MODE_ACTIVE);
+	pms.waitForData(Pms5003::WAKEUP_TIME);
 }
 
 ////////////////////////////////////////
@@ -43,15 +43,15 @@ auto lastRead = millis();
 // ReSharper disable once CppInconsistentNaming
 void loop(void) {
 
-	const Pms5003::pmsIdx n = Pms5003::nValues_PmsDataNames;
-	Pms5003::pmsData data[n];
+	const Pms5003::pmsIdx_t n = Pms5003::N_VALUES_PMSDATANAMES;
+	Pms5003::pmsData_t data[n];
 
 	const auto t0Read = millis();
 	const Pms5003::PmsStatus status = pms.read(data, n);
 	const auto t1Read = millis();
 
 	switch (status) {
-	case Pms5003::OK: {
+	case Pms5003::PmsStatus::OK: {
 		Serial.print("_________________ time of read(): ");
 		Serial.print(t1Read - t0Read);
 		Serial.println(" msec");
@@ -60,7 +60,7 @@ void loop(void) {
 		Serial.println(newRead - lastRead);
 		lastRead = newRead;
 
-		for (Pms5003::pmsIdx i = 0; i < n; ++i) {
+		for (Pms5003::pmsIdx_t i = 0; i < n; ++i) {
 			Serial.print(data[i]);
 			Serial.print("\t");
 			Serial.print(Pms5003::getDataNames(i));
@@ -71,7 +71,7 @@ void loop(void) {
 		}
 		break;
 	}
-	case Pms5003::NO_DATA:
+	case Pms5003::PmsStatus::NO_DATA:
 		break;
 	default:
 		Serial.println("_________________");

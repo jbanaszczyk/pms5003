@@ -14,8 +14,8 @@ public:
 		return serial.available();
 	}
 
-	bool begin(const uint32_t baud) override {
-		return serial.begin(baud);
+	bool begin(const uint32_t baudRate) override {
+		return serial.begin(baudRate);
 	}
 
 	void end() override {

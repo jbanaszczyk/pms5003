@@ -46,8 +46,8 @@ void setup(void) {
 	Serial.println("PMS5003");
 
 	pms.begin();
-	pms.waitForData(Pms5003::wakeupTime);
-	pms.write(Pms5003::cmdModeActive);
+	pms.waitForData(Pms5003::WAKEUP_TIME);
+	pms.write(Pms5003::CMD_MODE_ACTIVE);
 }
 
 ////////////////////////////////////////
@@ -56,13 +56,13 @@ auto lastRead = millis();
 
 void loop(void) {
 
-	const auto n = Pms5003::Reserved;
-	Pms5003::pmsData data[n];
+	const auto n = Pms5003::RESERVED;
+	Pms5003::pmsData_t data[n];
 
 	Pms5003::PmsStatus status = pms.read(data, n);
 
 	switch (status) {
-		case Pms5003::OK:
+		case Pms5003::PmsStatus::OK:
 		{
 			Serial.println("_________________");
 			auto newRead = millis();
@@ -71,8 +71,8 @@ void loop(void) {
 			lastRead = newRead;
 
 			// For loop starts from 3
-			// Skip the first three data (PM1dot0CF1, PM2dot5CF1, PM10CF1)
-			for (size_t i = Pms5003::PM1dot0; i < n; ++i) {
+			// Skip the first three data (PM_1_DOT_0_CF1, PM_2_DOT_5_CF1, PM10CF1)
+			for (size_t i = Pms5003::PM_1_DOT_0; i < n; ++i) {
 				Serial.print(data[i]);
 				Serial.print("\t");
 				Serial.print(Pms5003::dataNames[i]);
@@ -83,7 +83,7 @@ void loop(void) {
 			}
 			break;
 		}
-		case Pms5003::NO_DATA:
+		case Pms5003::PmsStatus::NO_DATA:
 			break;
 		default:
 			Serial.println("_________________");
@@ -127,17 +127,17 @@ See: [Config: PMS_DYNAMIC](#Cfg_PMS_DYNAMIC)
 
 ## Data types
 
-### pmsData<a name="API_pmsData"></a>
+### pmsData_t<a name="API_pmsData"></a>
 ```C++
-typedef uint16_t pmsData;
+typedef uint16_t pmsData_t;
 ```
 Type of single data received from the sensor.
 
 _Shown in_: [Basic scenario](#Hello)
 
-### pmsIdx<a name="API_pmsIdx"></a>
+### pmsIdx_t<a name="API_pmsIdx"></a>
 ```C++
-typedef uint8_t pmsIdx;
+typedef uint8_t pmsIdx_t;
 ```
 Underlying type of [PmsDataNames](#API_PmsDataNames), suitable for declaring size of array receiving data from the sensor or to iterate over it.
 
@@ -150,11 +150,11 @@ You can use any unsigned int type instead. _As shown in_: [Basic scenario](#Hell
 ### PmsStatus<a name="API_PmsStatus"></a>
 ```
 enum PmsStatus : uint8_t {
-	OK = 0,
-	NO_DATA,
-	READ_ERROR,
-	FRAME_LENGTH_MISMATCH,
-	SUM_ERROR,
+	PmsStatus::OK = 0,
+	PmsStatus::NO_DATA,
+	PmsStatus::READ_ERROR,
+	PmsStatus::FRAME_LENGTH_MISMATCH,
+	PmsStatus::SUM_ERROR,
 	...
 };
 ```
@@ -169,38 +169,38 @@ _Shown in_: [Basic scenario](#Hello)
 
 ### PmsDataNames<a name="API_PmsDataNames"></a>
 ```C++
-enum PmsDataNames : pmsIdx {
-	PM1dot0CF1 = 0,       //  0
-	PM2dot5CF1,           //  1
-	PM10dot0CF1,          //  2
-	PM1dot0,              //  3
-	PM2dot5,              //  4
-	PM10dot0,             //  5
-	Particles0dot3,       //  6
-	Particles0dot5,       //  7
-	Particles1dot0,       //  8
-	Particles2dot5,       //  9
-	Particles5dot0,       // 10
-	Particles10,          // 11
-	Reserved,             // 12
-	nValues_PmsDataNames  // 13
+enum PmsDataNames : pmsIdx_t {
+	PM_1_DOT_0_CF1 = 0,       //  0
+	PM_2_DOT_5_CF1,           //  1
+	PM_10_CF1,          //  2
+	PM_1_DOT_0,              //  3
+	PM_2_DOT_5,              //  4
+	PM_10_DOT_0,             //  5
+	PARTICLES_0_DOT_3,       //  6
+	PARTICLES_0_DOT_5,       //  7
+	PARTICLES_1_DOT_0,       //  8
+	PARTICLES_2_DOT_5,       //  9
+	PARTICLES_5_DOT_0,       // 10
+	PARTICLES_10,          // 11
+	RESERVED,             // 12
+	N_VALUES_PMSDATANAMES  // 13
 };
 ```
 
 Names (indexes) of particular data received from the sensor.
 
-Sensor transmits array of data (each of type [pmsData](#pmsData). If you are interested in particular data - use index. For example: ```data[Particles0dot3]```.
+Sensor transmits array of data (each of type [pmsData_t](#pmsData_t). If you are interested in particular data - use index. For example: ```data[PARTICLES_0_DOT_3]```.
 
 _Shown in_: [Basic scenario](#Hello)
 
 ### PmsCmd<a name="API_PmsCmd"></a>
 ```C++
 enum PmsCmd : __uint24 {
-	cmdReadData    = ...
-	cmdModePassive = ...
-	cmdModeActive  = ...
-	cmdSleep       = ...
-	cmdWakeup      = ...
+	CMD_READ_DATA    = ...
+	CMD_MODE_PASSIVE = ...
+	CMD_MODE_ACTIVE  = ...
+	CMD_SLEEP       = ...
+	CMD_WAKEUP      = ...
 };
 ```
 
@@ -301,13 +301,13 @@ void setTimeout(const unsigned long timeout);
 unsigned long getTimeout(void) const;
 ```
 
-By default - the most important method: ```read()``` does not block (it does not wait for data, just returns ```Pms5003::NO_DATA```).
+By default - the most important method: ```read()``` does not block (it does not wait for data, just returns ```Pms5003::PmsStatus::NO_DATA```).
 
 ```write()``` in case of data transfer errors may block.
 
 ```setTimeout()```, ```getTimeout()``` deals with serial port timeouts.
 
-Default timeout set by [begin()](#API_begin) equals to ```private: timeoutPassive```, currently: 68 (twice time required to transfer 1start + 32data + 1stop using 9600bps).
+Default timeout set by [begin()](#API_begin) equals to ```private: TIMEOUT_PASSIVE```, currently: 68 (twice time required to transfer 1start + 32data + 1stop using 9600bps).
 
 ### flushInput<a name="API_flushInput"></a>
 
@@ -354,7 +354,7 @@ _Shown in_: [Basic scenario](#Hello)
 ### read<a name="API_read"></a>
 
 ```C++
-PmsStatus read(pmsData *data, const size_t nData, const uint8_t dataSize = 13);
+PmsStatus read(pmsData_t *data, const size_t nData, const uint8_t dataSize = 13);
 ```
 
 **read() should not block.**
@@ -362,13 +362,13 @@ PmsStatus read(pmsData *data, const size_t nData, const uint8_t dataSize = 13);
 The most important function of the library. It receives, transforms and verifies data provided by PMS5003 sensor.
 
 Arguments:
-* data: pointer to an array containing _nData_ elements of type [pmsData](#pmsData).
+* data: pointer to an array containing _nData_ elements of type [pmsData_t](#pmsData_t).
 * nData: number of data, that can be received and stored.
 * dataSize: In general: don't use.
 
 Returns [Pms5003::PmsStatus](#API_PmsStatus):
-* ```Pms5003::OK```: whole, not malformed data frame was received from the sensor, up to nData elements of *data was filled according to received data.
-* ```Pms5003::NO_DATA```: There is not enough data to read.
+* ```Pms5003::PmsStatus::OK```: whole, not malformed data frame was received from the sensor, up to nData elements of *data was filled according to received data.
+* ```Pms5003::PmsStatus::NO_DATA```: There is not enough data to read.
 * Otherwise: refer to [errorMsg](#API_errorMsg)
 
 _Typical usage_: [Basic scenario](#Hello)
@@ -379,7 +379,7 @@ _nData_:
 
 _dataSize_:
 * It specifies expected size of data frame: dataFrameSize = ( dataSize + 3 ) * 2;
-* If there is not enough data to complete the whole frame - read() returns ```Pms5003::NO_DATA``` and does not block.
+* If there is not enough data to complete the whole frame - read() returns ```Pms5003::PmsStatus::NO_DATA``` and does not block.
 * Typical frame sent by the sensor contains 32 bytes. Appropriate dataSize value is 13 (the default).
 
 ### write<a name="API_write"></a>
@@ -387,7 +387,7 @@ _dataSize_:
 ```C++
 bool write(const PmsCmd cmd);
 ```
-**write() can block up to [ackTimeout](#API_ackTimeout) (currently 30milliseconds), typically about 10milliseconds.**
+**write() can block up to [TIMEOUT_ACK](#API_ackTimeout) (currently 30milliseconds), typically about 10milliseconds.**
 
 It sends a command to PMS5003 sensor. Refer to [commands section](#Commands).
 
@@ -403,23 +403,23 @@ _Shown in_: [Basic scenario](#Hello)
 
 ## Consts
 
-### ackTimeout<a name="API_ackTimeout"></a>
+### TIMEOUT_ACK<a name="API_ackTimeout"></a>
 
 ```C++
-private: static const auto ackTimeout = 30U;
+private: static const auto TIMEOUT_ACK = 30U;
 ```
 
 Used internally (inside write()). Defines timeout for response read after write command. 
 
-write() can block up to ackTimeout.
+write() can block up to TIMEOUT_ACK.
 
-### wakeupTime<a name="API_wakeupTime"></a>
+### WAKEUP_TIME<a name="API_wakeupTime"></a>
 
 ```C++
-static const auto wakeupTime = 2500U;
+static const auto WAKEUP_TIME = 2500U;
 ```
 
-wakeupTime defines time after power on, reset or write(cmdWakeup) when the sensor is blind for any commands. 
+WAKEUP_TIME defines time after power on, reset or write(CMD_WAKEUP) when the sensor is blind for any commands. 
 
 _Shown in_: [Basic scenario](#Hello)
 
@@ -432,11 +432,11 @@ You can send commands to the PMS5003 sensor using [write()](#API_write).
 |From State|input                |To State  |Output                                |
 |----------|---------------------|----------|--------------------------------------|
 |[Any]     |Power on             |Active    |Spontaneously sends data frames       |
-|[Any]     |write(cmdWakeup)     |Active    |Spontaneously sends data frames       |
-|[Any]     |write(cmdSleep)      |Sleep     |None (waits for cmdWakeup)            |
-|Active    |write(cmdModePassive)|Passive   |None                                  |
-|Passive   |write(cmdModeActive) |Active    |Spontaneously sends data frames       |
-|Passive   |write(cmdReadData)   |Passive   |Sends single data frame               |
+|[Any]     |write(CMD_WAKEUP)     |Active    |Spontaneously sends data frames       |
+|[Any]     |write(CMD_SLEEP)      |Sleep     |None (waits for CMD_WAKEUP)            |
+|Active    |write(CMD_MODE_PASSIVE)|Passive   |None                                  |
+|Passive   |write(CMD_MODE_ACTIVE) |Active    |Spontaneously sends data frames       |
+|Passive   |write(CMD_READ_DATA)   |Passive   |Sends single data frame               |
 
 
 

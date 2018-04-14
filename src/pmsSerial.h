@@ -3,7 +3,7 @@
 class IPmsSerial {
 public:
 	virtual ~IPmsSerial() = default;
-	virtual bool begin(uint32_t baud);
+	virtual bool begin(uint32_t baudRate);
 	virtual void end();
 
 	virtual void setTimeout(unsigned long timeout);
