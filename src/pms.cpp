@@ -17,32 +17,36 @@ template <class T> inline const T& __attribute__((always_inline)) min(const T& a
 
 ////////////////////////////////////////
 
-inline void __attribute__((always_inline)) swapEndianBig16(uint16_t *x) {
-	constexpr union {
-		// endian.test16 == 0x0001 for low endian
-		// endian.test16 == 0x0100 for big endian
-		// should be properly optimized by compiler
-		uint16_t test16;
-		uint8_t test8[2];
-	} endian = { .test8 = { 1,0 } };
+namespace {
 
-	if (endian.test16 != 0x0100) {
-		uint8_t hi = (*x & 0xff00) >> 8;
-		uint8_t lo = (*x & 0xff);
-		*x = lo << 8 | hi;
+	inline void __attribute__((always_inline)) swapEndianBig16(uint16_t *x) {
+		constexpr union {
+			// endian.test16 == 0x0001 for low endian
+			// endian.test16 == 0x0100 for big endian
+			// should be properly optimized by compiler
+			uint16_t test16;
+			uint8_t test8[2];
+		} endian = { .test8 = { 1,0 } };
+
+		if (endian.test16 != 0x0100) {
+			uint8_t hi = (*x & 0xff00) >> 8;
+			uint8_t lo = (*x & 0xff);
+			*x = lo << 8 | hi;
+		}
 	}
-}
 
-////////////////////////////////////////
+	////////////////////////////////////////
 
-void sumBuffer(uint16_t *sum, const uint8_t *buffer, uint16_t cnt) {
-	for (; cnt > 0; --cnt, ++buffer) {
-		*sum += *buffer;
+	void sumBuffer(uint16_t *sum, const uint8_t *buffer, uint16_t cnt) {
+		for (; cnt > 0; --cnt, ++buffer) {
+			*sum += *buffer;
+		}
 	}
-}
 
-inline void sumBuffer(uint16_t *sum, const uint16_t data) {
-	*sum += (data & 0xFF) + (data >> 8);
+	inline void sumBuffer(uint16_t *sum, const uint16_t data) {
+		*sum += (data & 0xFF) + (data >> 8);
+	}
+
 }
 
 ////////////////////////////////////////
