@@ -59,7 +59,7 @@ Pms5003::Pms5003(IPmsSerial* pmsSerial) : Pms5003() {
 #if defined PMS_DYNAMIC
 	begin();
 #endif
-};
+}
 
 Pms5003::~Pms5003() {
 #if defined PMS_DYNAMIC
@@ -74,20 +74,20 @@ void Pms5003::addSerial(IPmsSerial* pmsSerial) {
 bool Pms5003::begin(void) {
 	pmsSerial->setTimeout(Pms5003::timeoutPassive);
 	return pmsSerial->begin(Pms5003::baud);
-};
+}
 
 void Pms5003::end(void) {
 	pmsSerial->end();
-};
+}
 
 void Pms5003::setTimeout(const decltype(timeout) timeout) {
 	this->timeout = timeout;
 	pmsSerial->setTimeout(timeout);
-};
+}
 
 decltype(Pms5003::timeout) Pms5003::getTimeout(void) const {
 	return timeout;
-};
+}
 
 size_t Pms5003::available(void) {
 	while (pmsSerial->available()) {
@@ -104,24 +104,24 @@ size_t Pms5003::available(void) {
 Pms5003::PmsStatus Pms5003::read(pmsData *data, const size_t nData, const uint8_t dataSize) {
 
 	if (available() < (dataSize + 2) * sizeof(pmsData) + sizeof(sig)) {
-		return noData;
+		return NO_DATA;
 	}
 
 	pmsSerial->read(); // Value is equal to sig[0]. There is no need to check the value, it was checked by prior peek()
 
 	if (pmsSerial->read() != sig[1]) // The rest of the buffer will be invalidated during the next read attempt
-		return readError;
+		return READ_ERROR;
 
 	uint16_t sum{ 0 };
 	sumBuffer(&sum, (uint8_t *)&sig, sizeof(sig));
 
 	pmsData thisFrameLen{ 0x1c };
 	if (pmsSerial->read((uint8_t*)&thisFrameLen, sizeof(thisFrameLen)) != sizeof(thisFrameLen)) {
-		return readError;
+		return READ_ERROR;
 	};
 
 	if (thisFrameLen % 2 != 0) {
-		return frameLenMismatch;
+		return FRAME_LENGTH_MISMATCH;
 	}
 	sumBuffer(&sum, thisFrameLen);
 
@@ -129,7 +129,7 @@ Pms5003::PmsStatus Pms5003::read(pmsData *data, const size_t nData, const uint8_
 
 	swapEndianBig16(&thisFrameLen);
 	if (thisFrameLen > maxFrameLen) {
-		return frameLenMismatch;
+		return FRAME_LENGTH_MISMATCH;
 	}
 
 	size_t toRead{ min(thisFrameLen - 2, nData * sizeof(pmsData)) };
@@ -139,7 +139,7 @@ Pms5003::PmsStatus Pms5003::read(pmsData *data, const size_t nData, const uint8_
 
 	if (toRead) {
 		if (pmsSerial->read((uint8_t*)data, toRead) != toRead) {
-			return readError;
+			return READ_ERROR;
 		}
 		sumBuffer(&sum, (uint8_t*)data, toRead);
 
@@ -151,7 +151,7 @@ Pms5003::PmsStatus Pms5003::read(pmsData *data, const size_t nData, const uint8_
 	pmsData crc;
 	for (; toRead < thisFrameLen; toRead += 2) {
 		if (pmsSerial->read((uint8_t*)&crc, sizeof(crc)) != sizeof(crc)) {
-			return readError;
+			return READ_ERROR;
 		};
 
 		if (toRead < thisFrameLen - 2) {
@@ -162,7 +162,7 @@ Pms5003::PmsStatus Pms5003::read(pmsData *data, const size_t nData, const uint8_
 	swapEndianBig16(&crc);
 
 	if (sum != crc) {
-		return sumError;
+		return SUM_ERROR;
 	}
 
 	return OK;
@@ -270,12 +270,12 @@ const char *Pms5003::getDataNames(const pmsIdx idx) {
 	return idx < nValues_PmsDataNames ? Pms5003::dataNames[idx] : "???";
 }
 
-const char * Pms5003::errorMsg[nValues_PmsStatus]{
+const char * Pms5003::errorMsg[N_VALUES_PMSSTATUS]{
 	"OK",
-	"noData",
-	"readError",
-	"frameLenMismatch",
-	"sumError"
+	"NO_DATA",
+	"READ_ERROR",
+	"FRAME_LENGTH_MISMATCH",
+	"SUM_ERROR"
 };
 
 const char *Pms5003::metrics[]{

@@ -83,7 +83,7 @@ void loop(void) {
 			}
 			break;
 		}
-		case Pms5003::noData:
+		case Pms5003::NO_DATA:
 			break;
 		default:
 			Serial.println("_________________");
@@ -151,10 +151,10 @@ You can use any unsigned int type instead. _As shown in_: [Basic scenario](#Hell
 ```
 enum PmsStatus : uint8_t {
 	OK = 0,
-	noData,
-	readError,
-	frameLenMismatch,
-	sumError,
+	NO_DATA,
+	READ_ERROR,
+	FRAME_LENGTH_MISMATCH,
+	SUM_ERROR,
 	...
 };
 ```
@@ -301,7 +301,7 @@ void setTimeout(const unsigned long timeout);
 unsigned long getTimeout(void) const;
 ```
 
-By default - the most important method: ```read()``` does not block (it does not wait for data, just returns ```Pms5003::noData```).
+By default - the most important method: ```read()``` does not block (it does not wait for data, just returns ```Pms5003::NO_DATA```).
 
 ```write()``` in case of data transfer errors may block.
 
@@ -368,7 +368,7 @@ Arguments:
 
 Returns [Pms5003::PmsStatus](#API_PmsStatus):
 * ```Pms5003::OK```: whole, not malformed data frame was received from the sensor, up to nData elements of *data was filled according to received data.
-* ```Pms5003::noData```: There is not enough data to read.
+* ```Pms5003::NO_DATA```: There is not enough data to read.
 * Otherwise: refer to [errorMsg](#API_errorMsg)
 
 _Typical usage_: [Basic scenario](#Hello)
@@ -379,7 +379,7 @@ _nData_:
 
 _dataSize_:
 * It specifies expected size of data frame: dataFrameSize = ( dataSize + 3 ) * 2;
-* If there is not enough data to complete the whole frame - read() returns ```Pms5003::noData``` and does not block.
+* If there is not enough data to complete the whole frame - read() returns ```Pms5003::NO_DATA``` and does not block.
 * Typical frame sent by the sensor contains 32 bytes. Appropriate dataSize value is 13 (the default).
 
 ### write<a name="API_write"></a>

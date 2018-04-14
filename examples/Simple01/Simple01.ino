@@ -12,6 +12,7 @@ Pms5003 pms(&pmsSerial);
 // Brown GND
 // Black VCC
 
+// ReSharper disable once CppInconsistentNaming
 void setup(void) {
 	Serial.begin(115200);
 	while (!Serial) {};
@@ -25,6 +26,7 @@ void setup(void) {
 
 ////////////////////////////////////////
 
+// ReSharper disable once CppInconsistentNaming
 void loop(void) {
 
 	static auto lastRead = millis();
@@ -32,13 +34,13 @@ void loop(void) {
 	const auto n = Pms5003::Reserved;
 	Pms5003::pmsData data[n];
 
-	Pms5003::PmsStatus status = pms.read(data, n);
+	const Pms5003::PmsStatus status = pms.read(data, n);
 
 	switch (status) {
 	case Pms5003::OK:
 	{
 		Serial.println("_________________");
-		auto newRead = millis();
+		const auto newRead = millis();
 		Serial.print("Wait time ");
 		Serial.println(newRead - lastRead);
 		lastRead = newRead;
@@ -56,7 +58,7 @@ void loop(void) {
 		}
 		break;
 	}
-	case Pms5003::noData:
+	case Pms5003::NO_DATA:
 		break;
 	default:
 		Serial.println("_________________");

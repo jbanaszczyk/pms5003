@@ -37,14 +37,14 @@ public:
 
 	enum PmsStatus : uint8_t {
 		OK = 0,
-		noData,
-		readError,
-		frameLenMismatch,
-		sumError,
-		nValues_PmsStatus
+		NO_DATA,
+		READ_ERROR,
+		FRAME_LENGTH_MISMATCH,
+		SUM_ERROR,
+		N_VALUES_PMSSTATUS
 	};
 
-	static const char *errorMsg[nValues_PmsStatus];
+	static const char *errorMsg[N_VALUES_PMSSTATUS];
 
 #if ! defined __INT24_MAX__
 	using  __uint24 = uint32_t;
@@ -78,10 +78,10 @@ public:
 	static const char *dataNames[nValues_PmsDataNames];
 	static const char *metrics[nValues_PmsDataNames];
 
-	static const char *getMetrics(const pmsIdx idx);
-	static const char *getDataNames(const pmsIdx idx);
+	static const char *getMetrics(pmsIdx idx);
+	static const char *getDataNames(pmsIdx idx);
 
-	void setTimeout(const decltype(timeout) timeout);
+	void setTimeout(decltype(timeout) timeout);
 	decltype(timeout) getTimeout(void) const;
 
 	static const auto wakeupTime = 2500U;    // Experimentally, time to get ready after reset/wakeup
@@ -90,7 +90,7 @@ public:
 	void end(void);
 	size_t available(void);
 	void flushInput(void);
-	PmsStatus read(pmsData *data, const size_t nData, const uint8_t dataSize = nValues_PmsDataNames);
-	bool write(const PmsCmd cmd);
-	bool waitForData(const unsigned int maxTime, const size_t nData = 0);
+	PmsStatus read(pmsData *data, size_t nData, uint8_t dataSize = nValues_PmsDataNames);
+	bool write(PmsCmd cmd);
+	bool waitForData(unsigned int maxTime, size_t nData = 0);
 };

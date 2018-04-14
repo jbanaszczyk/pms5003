@@ -37,8 +37,6 @@
 #if defined PMS_ALTSOFTSERIAL
 // Install https://github.com/DrDiettrich/AltSoftSerial.git)
 #include <pmsSerialAltSoftSerial.h>
-typedef PmsAltSerial pmsSerial_t;
 #endif
 
 ////////////////////////////////////////////
-
