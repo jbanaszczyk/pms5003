@@ -7,11 +7,13 @@
 // Please uncomment #define PMS_DYNAMIC in pmsConfig.h file
 //
 
+PmsAltSerial pmsSerial;
+
 #if defined PMS_DYNAMIC
 Pms5003 *pms_ = nullptr;
 #define pms (*pms_)
 #else
-Pms5003 pms;
+Pms5003 pms(&pmsSerial);
 #endif
 
 ////////////////////////////////////////
@@ -22,7 +24,7 @@ void setup(void) {
 	Serial.println("PMS5003");
 
 #if defined PMS_DYNAMIC
-	pms_ = new Pms5003();
+	pms_ = new Pms5003(&pmsSerial);
 #else
 	pms.begin();
 #endif 

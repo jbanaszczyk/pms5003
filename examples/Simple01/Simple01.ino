@@ -2,7 +2,8 @@
 
 #include <pms.h>
 
-Pms5003 pms;
+PmsAltSerial pmsSerial;
+Pms5003 pms(&pmsSerial);
 
 ////////////////////////////////////////
 

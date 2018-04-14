@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\src\pms.cpp = ..\src\pms.cpp
 		..\src\pms.h = ..\src\pms.h
 		..\src\pmsConfig.h = ..\src\pmsConfig.h
+		..\src\pmsSerial.h = ..\src\pmsSerial.h
+		..\src\pmsSerialAltSoftSerial.h = ..\src\pmsSerialAltSoftSerial.h
 		..\README.md = ..\README.md
 		..\src\tribool.h = ..\src\tribool.h
 	EndProjectSection
@@ -26,18 +28,17 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Debug|x64.ActiveCfg = Debug|Win32
 		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Debug|x86.ActiveCfg = Debug|Win32
-		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Debug|x86.Build.0 = Debug|Win32
 		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x64.ActiveCfg = Release|Win32
 		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x86.ActiveCfg = Release|Win32
-		{C5F80730-F44F-4478-BDAE-6634EFC2CA88}.Release|x86.Build.0 = Release|Win32
 		{64B4D7FE-3A88-4E46-9686-77DD3B31B318}.Debug|x64.ActiveCfg = Debug|Win32
 		{64B4D7FE-3A88-4E46-9686-77DD3B31B318}.Debug|x86.ActiveCfg = Debug|Win32
-		{64B4D7FE-3A88-4E46-9686-77DD3B31B318}.Debug|x86.Build.0 = Debug|Win32
 		{64B4D7FE-3A88-4E46-9686-77DD3B31B318}.Release|x64.ActiveCfg = Release|Win32
 		{64B4D7FE-3A88-4E46-9686-77DD3B31B318}.Release|x86.ActiveCfg = Release|Win32
-		{64B4D7FE-3A88-4E46-9686-77DD3B31B318}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E8A8F2C1-3A80-44AE-B6F0-CE83E0D9A594}
 	EndGlobalSection
 EndGlobal

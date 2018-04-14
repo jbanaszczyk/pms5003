@@ -6,8 +6,10 @@
 // Use one of: 
 // it depends on Serial Library (and serial pin connection)
 
-#if not defined(PMS_ALTSOFTSERIAL)
 #define PMS_ALTSOFTSERIAL
+
+#if not defined(PMS_ALTSOFTSERIAL)
+#error "At one of: PMS_ALTSOFTSERIAL have to be defined in pmsConfig.h"
 #endif
 
 ////////////////////////////////////////////
@@ -22,7 +24,7 @@
 //   pro: It can be created within setup(), it is good time to initialze class instance in the constructor. Arduino board was initialzed here.
 //   con: If you are not using heap: it uses heap, it adds meaningful code overhead - malloc, new() and memory mangement should be included. ( 0.5kb of program memory, a few memory bytes)
 
- // #define PMS_DYNAMIC
+// #define PMS_DYNAMIC
 
 ////////////////////////////////////////////
 
@@ -34,7 +36,9 @@
 ////////////////////////////////////////////
 
 #if defined PMS_ALTSOFTSERIAL
-#include <AltSoftSerial.h>
+// Install https://github.com/DrDiettrich/AltSoftSerial.git)
+#include <pmsSerialAltSoftSerial.h>
+typedef PmsAltSerial pmsSerial_t;
 #endif
 
 ////////////////////////////////////////////

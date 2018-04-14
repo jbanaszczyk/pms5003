@@ -5,6 +5,7 @@
 #include <Arduino.h>
 #include <tribool.h>
 #include <pmsConfig.h>
+#include <pmsSerial.h>
 
 // Important: Use 3.3V logic
 // Pin 1: Vcc
@@ -13,6 +14,8 @@
 // Using AltSoftSerial:
 //   Pin 4: Digital pin 9 (there is no choice) 
 //   Pin 5: Digital pin 8 (there is no choice)
+//   Enable #define PMS_ALTSOFTSERIAL
+//   Install DrDiettrich' fork of AltSoftSerial Library: https://github.com/DrDiettrich/AltSoftSerial.git
 
 class Pms5003 {
 public:
@@ -25,12 +28,15 @@ private:
 	unsigned long timeout;
 	static const decltype(timeout) timeoutPassive = 68;  // Transfer time of 1start + 32data + 1stop using 9600bps is 33 usec. timeoutPassive could be at least 34, Value of 68 is an arbitrary doubled
 	static const auto ackTimeout = 30U;                  // Time to complete response after write command
-
-#if defined PMS_ALTSOFTSERIAL
-	AltSoftSerial pmsSerial;
-#endif  
+	static const auto baud = 9600;                       // used during begin()
+	IPmsSerial *pmsSerial;
 
 public:
+	Pms5003();
+	Pms5003(IPmsSerial* pmsSerial);
+	~Pms5003();
+	void addSerial(IPmsSerial* pmsSerial);
+
 	enum PmsStatus : uint8_t {
 		OK = 0,
 		noData,
@@ -82,8 +88,6 @@ public:
 
 	static const auto wakeupTime = 2500U;    // Experimentally, time to get ready after reset/wakeup
 
-	Pms5003();
-	~Pms5003();
 	bool begin(void);
 	void end(void);
 	size_t available(void);
