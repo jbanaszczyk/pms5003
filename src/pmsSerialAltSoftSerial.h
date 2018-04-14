@@ -1,5 +1,4 @@
-#ifndef _pmsserial_altsoftserial_h_
-#define _pmsserial_altsoftserial_h_
+#pragma once
 
 #include <pmsSerial.h>
 #include <AltSoftSerial.h>
@@ -43,5 +42,3 @@ public:
 		return serial.write(buffer, size);
 	};
 };
-
-#endif

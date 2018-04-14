@@ -1,5 +1,4 @@
-#ifndef _PMS_CONFIG_H_
-#define _PMS_CONFIG_H_
+#pragma once
 
 ////////////////////////////////////////////
 
@@ -43,4 +42,3 @@ typedef PmsAltSerial pmsSerial_t;
 
 ////////////////////////////////////////////
 
-#endif

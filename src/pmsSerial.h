@@ -1,8 +1,8 @@
-#ifndef _pmsserial_h_
-#define _pmsserial_h_
+#pragma once
 
 class IPmsSerial {
 public:
+	virtual ~IPmsSerial() = default;
 	virtual bool begin(const uint32_t baud);
 	virtual void end();
 
@@ -15,5 +15,3 @@ public:
 	virtual size_t read(uint8_t *buffer, const size_t length);
 	virtual size_t write(const uint8_t *buffer, const size_t size);
 };
-
-#endif

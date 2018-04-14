@@ -1,6 +1,4 @@
-
-#ifndef _PMS_H_
-#define _PMS_H_
+#pragma once
 
 #include <Arduino.h>
 #include <tribool.h>
@@ -96,5 +94,3 @@ public:
 	bool write(const PmsCmd cmd);
 	bool waitForData(const unsigned int maxTime, const size_t nData = 0);
 };
-
-#endif
