@@ -18,8 +18,9 @@ void setup(void) {
 	Serial.println("PMS5003");
 
 	pms.begin();
-	pms.waitForData(Pms5003::wakeupTime);
+	pms.write(Pms5003::cmdWakeup);	
 	pms.write(Pms5003::cmdModeActive);
+	pms.waitForData(Pms5003::wakeupTime);
 }
 
 ////////////////////////////////////////

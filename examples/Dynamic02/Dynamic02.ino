@@ -29,8 +29,9 @@ void setup(void) {
 	pms.begin();
 #endif 
 
-	pms.waitForData(Pms5003::wakeupTime);
+	pms.write(Pms5003::cmdWakeup);
 	pms.write(Pms5003::cmdModeActive);
+	pms.waitForData(Pms5003::wakeupTime);
 }
 
 ////////////////////////////////////////
