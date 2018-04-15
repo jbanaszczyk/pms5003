@@ -1,3 +1,7 @@
+# Before
+
+Current version is under development, may be not stable enough. Please refer to the latest release: https://github.com/jbanaszczyk/pms5003/releases
+
 # pms5003
 
 I'm proud to present my Arduino library supporting PMS5003 Air Quality Sensor.
