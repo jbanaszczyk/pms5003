@@ -3,20 +3,6 @@
 
 ////////////////////////////////////////
 
-#if defined NOMINMAX
-
-#if defined min
-#undef min
-#endif
-template <class T> inline const T& __attribute__((always_inline)) min(const T& a, const T& b);
-template <class T> inline const T& __attribute__((always_inline)) min(const T& a, const T& b) {
-	return !(b < a) ? a : b;
-}
-
-#endif
-
-////////////////////////////////////////
-
 namespace {
 
 	inline void __attribute__((always_inline)) swapEndianBig16(uint16_t *x) {
@@ -89,32 +75,35 @@ decltype(Pms5003::timeout) Pms5003::getTimeout(void) const {
 	return timeout;
 }
 
-size_t Pms5003::available(void) {
+
+void Pms5003::skipGarbage() {
 	while ((pmsSerial->available()) && (pmsSerial->peek() != sig[0])) {
 		pmsSerial->read();
 	}
+}
+
+size_t Pms5003::available(void) {
+	skipGarbage();
 	return pmsSerial->available();
 }
 
 Pms5003::PmsStatus Pms5003::read(pmsData_t *data, const size_t nData, const uint8_t dataSize) {
-
-	while ((pmsSerial->available()) && (pmsSerial->peek() != sig[0])) {
-		pmsSerial->read();
-	}
-
+	skipGarbage();
 	if (available() < (dataSize + 2) * sizeof(pmsData_t) + sizeof(sig)) {
 		return PmsStatus{ PmsStatus::NO_DATA };
 	}
 
-	pmsSerial->read(); // Value is equal to sig[0]. There is no need to check the value, it was checked by prior peek()
+	pmsSerial->read(); // Value is equal to sig[0]. There is no need to check the value, it was checked by prior skipGarbage()
 
 	if (pmsSerial->read() != sig[1]) // The rest of the buffer will be invalidated during the next read attempt
 		return PmsStatus{ PmsStatus::READ_ERROR };
 
 	uint16_t sum{ 0 };
-	sumBuffer(&sum, (uint8_t *)&sig, sizeof(sig));
+  	sumBuffer(&sum, (uint8_t *)&sig, sizeof(sig));
 
+	// TODO co to?
 	pmsData_t thisFrameLen{ 0x1c };
+
 	if (pmsSerial->read((uint8_t*)&thisFrameLen, sizeof(thisFrameLen)) != sizeof(thisFrameLen)) {
 		return PmsStatus{ PmsStatus::READ_ERROR };
 	};
@@ -124,7 +113,8 @@ Pms5003::PmsStatus Pms5003::read(pmsData_t *data, const size_t nData, const uint
 	}
 	sumBuffer(&sum, thisFrameLen);
 
-	const decltype(thisFrameLen) maxFrameLen{ 2 * 0x1c };    // arbitrary
+	// TODO co to?
+	constexpr decltype(thisFrameLen) maxFrameLen = 2 * 0x1c;    // arbitrary
 
 	swapEndianBig16(&thisFrameLen);
 	if (thisFrameLen > maxFrameLen) {
@@ -165,6 +155,10 @@ Pms5003::PmsStatus Pms5003::read(pmsData_t *data, const size_t nData, const uint
 	}
 
 	return PmsStatus{ PmsStatus::OK };
+}
+
+Pms5003::PmsStatus Pms5003::read(Pms5003::PmsData& buffer) {
+	return read((pmsData_t *)&buffer.data.raw, buffer.data.raw.getSize(), buffer.data.raw.getSize());
 }
 
 void Pms5003::flushInput(void) {
@@ -314,3 +308,60 @@ const char *Pms5003::dataNames[]{
 
 	"Reserved_0"
 };
+
+const char * const Pms5003::PmsData::NAMES[]{
+	"PM1.0, CF=1",
+	"PM2.5, CF=1",
+	"PM10.  CF=1",
+	"PM1.0",
+	"PM2.5",
+	"PM10.",
+
+	"Particles > 0.3 micron",
+	"Particles > 0.5 micron",
+	"Particles > 1.0 micron",
+	"Particles > 2.5 micron",
+	"Particles > 5.0 micron",
+	"Particles > 10. micron",
+
+	"Reserved_0"
+};
+
+const float Pms5003::PmsData::DIAMETERS[]{
+	1.0d,
+	2.5d,
+	10.0d,
+
+	1.0d,
+	2.5d,
+	10.0d,
+
+	1.0d,
+	2.5d,
+	10.0d,
+	1.0d,
+	2.5d,
+	10.0d,
+
+	0.0d
+};
+
+const char * const Pms5003::PmsData::METRICS[]{
+	"mcg/m3",
+	"mcg/m3",
+	"mcg/m3",
+
+	"mcg/m3",
+	"mcg/m3",
+	"mcg/m3",
+
+	"/0.1L",
+	"/0.1L",
+	"/0.1L",
+	"/0.1L",
+	"/0.1L",
+	"/0.1L",
+
+	"???"
+};
+
