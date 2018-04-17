@@ -88,8 +88,8 @@ public:
 	void addSerial(IPmsSerial* pmsSerial) { this->pmsSerial = pmsSerial; }
 
 	bool begin(void) const {
-		pmsSerial->setTimeout(Pms::TIMEOUT_PASSIVE);
-		return pmsSerial->begin(Pms::BAUD_RATE);
+		pmsSerial->setTimeout(TIMEOUT_PASSIVE);
+		return pmsSerial->begin(BAUD_RATE);
 	}
 
 	void end(void) const { pmsSerial->end(); }
@@ -244,7 +244,7 @@ public:
 		};
 	};
 
-	static_assert(sizeof(Pms::PmsData) == Pms::PmsData::DATA_SIZE * sizeof(Pms::pmsData_t), "PmsData: wrong sizeof()");
+	static_assert(sizeof(PmsData) == PmsData::DATA_SIZE * sizeof(pmsData_t), "PmsData: wrong sizeof()");
 
 	////////////////////////////////////////
 
@@ -259,7 +259,7 @@ public:
 
 		if (endian.test16 != 0x0100) {
 			uint8_t hi = (*x & 0xff00) >> 8;
-			uint8_t lo = (*x & 0xff);
+			uint8_t lo = *x & 0xff;
 			*x = lo << 8 | hi;
 		}
 	}
@@ -270,7 +270,7 @@ public:
 		for (; cnt > 0; --cnt, ++buffer) { *sum += *buffer; }
 	}
 
-	void sumBuffer(uint16_t* sum, const uint16_t data) { *sum += (data & 0xFF) + (data >> 8); }
+	static void sumBuffer(uint16_t* sum, const uint16_t data) { *sum += (data & 0xFF) + (data >> 8); }
 
 	////////////////////////////////////////
 
@@ -286,16 +286,16 @@ public:
 		return pmsSerial->available();
 	}
 
-	void flushInput(void) { pmsSerial->flushInput(); }
+	void flushInput(void) const { pmsSerial->flushInput(); }
 
 	bool waitForData(unsigned int maxTime, size_t nData = 0) {
 		const auto t0 = millis();
 		if (nData == 0) {
-			for (; (millis() - t0) < maxTime; delay(1)) { if (pmsSerial->available()) { return true; } }
+			for (; millis() - t0 < maxTime; delay(1)) { if (pmsSerial->available()) { return true; } }
 			return pmsSerial->available();
 		}
 
-		for (; (millis() - t0) < maxTime; delay(1)) { if (available() >= nData) { return true; } }
+		for (; millis() - t0 < maxTime; delay(1)) { if (available() >= nData) { return true; } }
 		return available() >= nData;
 	}
 
@@ -318,14 +318,14 @@ public:
 
 		pmsData_t thisFrameLen{0};
 
-		if (pmsSerial->read((uint8_t*)&thisFrameLen, sizeof(thisFrameLen)) != sizeof(thisFrameLen)) {
+		if (pmsSerial->read((uint8_t*)&thisFrameLen, sizeof thisFrameLen) != sizeof thisFrameLen) {
 			return PmsStatus{PmsStatus::READ_ERROR};
-		};
+		}
 
 		sumBuffer(&sum, thisFrameLen);
 		swapEndianBig16(&thisFrameLen);
 
-		size_t toRead{thisFrameLen - sizeof(thisFrameLen)};
+		size_t toRead{thisFrameLen - sizeof thisFrameLen};
 
 		if (toRead != nData * sizeof(*data)) { return PmsStatus{PmsStatus::FRAME_LENGTH_MISMATCH}; }
 
@@ -340,7 +340,7 @@ public:
 
 		pmsData_t crc;
 		for (; toRead < thisFrameLen; toRead += 2) {
-			if (pmsSerial->read((uint8_t*)&crc, sizeof(crc)) != sizeof(crc)) { return PmsStatus{PmsStatus::READ_ERROR}; };
+			if (pmsSerial->read((uint8_t*)&crc, sizeof crc) != sizeof crc) { return PmsStatus{PmsStatus::READ_ERROR}; }
 
 			if (toRead < thisFrameLen - 2) { sumBuffer(&sum, crc); }
 		}
@@ -353,7 +353,7 @@ public:
 	}
 
 	bool write(PmsCmd cmd) {
-		static_assert(sizeof(cmd) >= 3, "Wrong definition of PmsCmd (too short)");
+		static_assert(sizeof cmd >= 3, "Wrong definition of PmsCmd (too short)");
 
 		if (pmsSerial->write(sig, sizeof(sig)) != sizeof(sig)) { return false; }
 		const size_t cmdSize = 3;
@@ -364,9 +364,9 @@ public:
 		sumBuffer(&sum, (uint8_t*)&cmd, cmdSize);
 		swapEndianBig16(&sum);
 
-		if (pmsSerial->write((uint8_t*)&sum, sizeof(sum)) != sizeof(sum)) { return false; }
+		if (pmsSerial->write((uint8_t*)&sum, sizeof sum) != sizeof sum) { return false; }
 
-		if ((cmd != PmsCmd::CMD_READ_DATA) && (cmd != PmsCmd::CMD_WAKEUP)) { flushInput(); }
+		if (cmd != PmsCmd::CMD_READ_DATA && cmd != PmsCmd::CMD_WAKEUP) { flushInput(); }
 
 		switch (cmd) {
 		case PmsCmd::CMD_MODE_PASSIVE:
@@ -386,13 +386,13 @@ public:
 			break;
 		}
 
-		if ((cmd != PmsCmd::CMD_READ_DATA) && (cmd != PmsCmd::CMD_WAKEUP)) {
+		if (cmd != PmsCmd::CMD_READ_DATA && cmd != PmsCmd::CMD_WAKEUP) {
 			const auto responseFrameSize = 8;
 			if (!waitForData(TIMEOUT_ACK, responseFrameSize)) {
 				pmsSerial->flushInput();
 				return true;
 			}
-			Pms::pmsData_t response = 0xCCCC;
+			pmsData_t response = 0xCCCC;
 			read(&response, 1);
 		}
 
