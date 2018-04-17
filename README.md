@@ -36,7 +36,7 @@ Use the code: https://github.com/jbanaszczyk/pms5003/tree/master/examples/01_Sim
 #include <Arduino.h>
 #include <pms.h>
 
-Pms5003 pms;
+Pms pms;
 
 ////////////////////////////////////////
 
@@ -46,8 +46,8 @@ void setup(void) {
 	Serial.println("PMS5003");
 
 	pms.begin();
-	pms.waitForData(Pms5003::WAKEUP_TIME);
-	pms.write(Pms5003::CMD_MODE_ACTIVE);
+	pms.waitForData(Pms::WAKEUP_TIME);
+	pms.write(Pms::CMD_MODE_ACTIVE);
 }
 
 ////////////////////////////////////////
@@ -56,13 +56,13 @@ auto lastRead = millis();
 
 void loop(void) {
 
-	const auto n = Pms5003::RESERVED;
-	Pms5003::pmsData_t data[n];
+	const auto n = Pms::RESERVED;
+	Pms::pmsData_t data[n];
 
-	Pms5003::PmsStatus status = pms.read(data, n);
+	Pms::PmsStatus status = pms.read(data, n);
 
 	switch (status) {
-		case Pms5003::PmsStatus::OK:
+		case Pms::PmsStatus::OK:
 		{
 			Serial.println("_________________");
 			auto newRead = millis();
@@ -72,22 +72,22 @@ void loop(void) {
 
 			// For loop starts from 3
 			// Skip the first three data (PM_1_DOT_0_CF1, PM_2_DOT_5_CF1, PM10CF1)
-			for (size_t i = Pms5003::PM_1_DOT_0; i < n; ++i) {
+			for (size_t i = Pms::PM_1_DOT_0; i < n; ++i) {
 				Serial.print(data[i]);
 				Serial.print("\t");
-				Serial.print(Pms5003::dataNames[i]);
+				Serial.print(Pms::dataNames[i]);
 				Serial.print(" [");
-				Serial.print(Pms5003::metrics[i]);
+				Serial.print(Pms::metrics[i]);
 				Serial.print("]");
 				Serial.println();
 			}
 			break;
 		}
-		case Pms5003::PmsStatus::NO_DATA:
+		case Pms::PmsStatus::NO_DATA:
 			break;
 		default:
 			Serial.println("_________________");
-			Serial.println(Pms5003::errorMsg[status]);
+			Serial.println(Pms::errorMsg[status]);
 	};
 }
 
@@ -113,15 +113,15 @@ Wait time 836
 
 ## Classes
 
-### Pms5003<a name="API_Pms5003"></a>
+### Pms<a name="API_Pms5003"></a>
 ```C++
-class Pms5003 {...}
+class Pms {...}
 ```
-Pms5003 provides all methods, data type, enums to provide support for PMS5003 sensor. In most cases there will be used single object of that class.
+Pms provides all methods, data type, enums to provide support for PMS5003 sensor. In most cases there will be used single object of that class.
 
 _Shown in_: [Basic scenario](#Hello)
 
-#### ctor/dtor: Pms5003(), ~Pms5003()
+#### ctor/dtor: Pms(), ~Pms()
 
 See: [Config: PMS_DYNAMIC](#Cfg_PMS_DYNAMIC)
 
@@ -230,8 +230,8 @@ _Shown in_: [Basic scenario](#Hello)
 
 #### getDataNames<a name="API_getDataNames"></a>
 ```Cpp
-const char *Pms5003::getDataNames(const uint8_t idx);
-Serial.print(Pms5003::getDataNames(i)); // instead of Serial.print(Pms5003::dataNames[i]);
+const char *Pms::getDataNames(const uint8_t idx);
+Serial.print(Pms::getDataNames(i)); // instead of Serial.print(Pms::dataNames[i]);
 ```
 
 There is provided range-safe function to access dataNames values: getDataNames();
@@ -249,8 +249,8 @@ _Shown in_: [Basic scenario](#Hello)
 
 #### getMetrics<a name="API_getMetrics"></a>
 ```Cpp
-const char *Pms5003::getMetrics(const uint8_t idx);
-Serial.print(Pms5003::getMetrics(i)); // instead of Serial.print(Pms5003::metrics[i]);
+const char *Pms::getMetrics(const uint8_t idx);
+Serial.print(Pms::getMetrics(i)); // instead of Serial.print(Pms::metrics[i]);
 ```
 
 There is provided range-safe function to access metrics values: getMetrics();
@@ -265,9 +265,9 @@ _Shown in_: [Second example](https://github.com/jbanaszczyk/pms5003/blob/master/
 bool begin(void);
 ```
 
-Initializes Pms5003 object.
+Initializes Pms object.
 
-If defined ```PMS_DYNAMIC```: automatically executed by ctor: ```Pms5003()```
+If defined ```PMS_DYNAMIC```: automatically executed by ctor: ```Pms()```
 
 Should be executed by global ```setup()``` otherwise.
 
@@ -283,9 +283,9 @@ See: [Config: PMS_DYNAMIC](#Cfg_PMS_DYNAMIC)
 void end(void);
 ```
 
-Destroys Pms5003 object.
+Destroys Pms object.
 
-If defined ```PMS_DYNAMIC```: automatically executed by dtor: ```~Pms5003()```
+If defined ```PMS_DYNAMIC```: automatically executed by dtor: ```~Pms()```
 
 Not needed otherwise.
 
@@ -301,7 +301,7 @@ void setTimeout(const unsigned long timeout);
 unsigned long getTimeout(void) const;
 ```
 
-By default - the most important method: ```read()``` does not block (it does not wait for data, just returns ```Pms5003::PmsStatus::NO_DATA```).
+By default - the most important method: ```read()``` does not block (it does not wait for data, just returns ```Pms::PmsStatus::NO_DATA```).
 
 ```write()``` in case of data transfer errors may block.
 
@@ -338,7 +338,7 @@ bool waitForData(const unsigned int maxTime, const size_t nData = 0);
 ```
 **waitForData() may block.**
 
-waitForData(maxTime) works like a delay(maxTime), but can be terminated by Pms5003 sensor activity.
+waitForData(maxTime) works like a delay(maxTime), but can be terminated by Pms sensor activity.
 
 Arguments:
 * maxTime: amount of time to wait,
@@ -366,9 +366,9 @@ Arguments:
 * nData: number of data, that can be received and stored.
 * dataSize: In general: don't use.
 
-Returns [Pms5003::PmsStatus](#API_PmsStatus):
-* ```Pms5003::PmsStatus::OK```: whole, not malformed data frame was received from the sensor, up to nData elements of *data was filled according to received data.
-* ```Pms5003::PmsStatus::NO_DATA```: There is not enough data to read.
+Returns [Pms::PmsStatus](#API_PmsStatus):
+* ```Pms::PmsStatus::OK```: whole, not malformed data frame was received from the sensor, up to nData elements of *data was filled according to received data.
+* ```Pms::PmsStatus::NO_DATA```: There is not enough data to read.
 * Otherwise: refer to [errorMsg](#API_errorMsg)
 
 _Typical usage_: [Basic scenario](#Hello)
@@ -379,7 +379,7 @@ _nData_:
 
 _dataSize_:
 * It specifies expected size of data frame: dataFrameSize = ( dataSize + 3 ) * 2;
-* If there is not enough data to complete the whole frame - read() returns ```Pms5003::PmsStatus::NO_DATA``` and does not block.
+* If there is not enough data to complete the whole frame - read() returns ```Pms::PmsStatus::NO_DATA``` and does not block.
 * Typical frame sent by the sensor contains 32 bytes. Appropriate dataSize value is 13 (the default).
 
 ### write<a name="API_write"></a>
