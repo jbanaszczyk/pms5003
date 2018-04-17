@@ -3,7 +3,7 @@
 #include <pms.h>
 
 PmsAltSerial pmsSerial;
-Pms5003 pms(&pmsSerial);
+Pms pms(&pmsSerial);
 
 ////////////////////////////////////////
 
@@ -15,13 +15,13 @@ Pms5003 pms(&pmsSerial);
 // ReSharper disable once CppInconsistentNaming
 void setup(void) {
 	Serial.begin(115200);
-	while (!Serial) {};
+	while (!Serial) {}
 	Serial.println("PMS5003");
 
 	pms.begin();
-	pms.write(Pms5003::cmdWakeup);
-	pms.write(Pms5003::cmdModeActive);
-	pms.waitForData(Pms5003::wakeupTime);
+	pms.write(Pms::PmsCmd::CMD_WAKEUP);
+	pms.write(Pms::PmsCmd::CMD_MODE_ACTIVE);
+	pms.waitForData(Pms::WAKEUP_TIME);
 }
 
 ////////////////////////////////////////
@@ -31,36 +31,35 @@ void loop(void) {
 
 	static auto lastRead = millis();
 
-	const auto n = Pms5003::Reserved;
-	Pms5003::pmsData data[n];
-
-	const Pms5003::PmsStatus status = pms.read(data, n);
+	Pms::PmsData data;
+	auto status = pms.read(data);
 
 	switch (status) {
-	case Pms5003::OK: {
+	case Pms::PmsStatus::OK: {
 		Serial.println("_________________");
 		const auto newRead = millis();
 		Serial.print("Wait time ");
 		Serial.println(newRead - lastRead);
 		lastRead = newRead;
 
-		// For loop starts from 3
-		// Skip the first three data (PM1dot0CF1, PM2dot5CF1, PM10CF1)
-		for (size_t i = Pms5003::PM1dot0; i < n; ++i) {
-			Serial.print(data[i]);
+		auto view = data.particles;
+		for (auto i = 0; i < view.getSize(); ++i) {
+			Serial.print(view[i]);
 			Serial.print("\t");
-			Serial.print(Pms5003::dataNames[i]);
+			Serial.print(view.getName(i));
+
 			Serial.print(" [");
-			Serial.print(Pms5003::metrics[i]);
-			Serial.print("]");
+			Serial.print(view.getMetric(i));
+			Serial.print("] ");
+			Serial.print(view.getLevel(i));
 			Serial.println();
 		}
 		break;
 	}
-	case Pms5003::NO_DATA:
+	case Pms::PmsStatus::NO_DATA:
 		break;
 	default:
-		Serial.println("_________________");
-		Serial.println(Pms5003::errorMsg[status]);
-	};
+		Serial.print("!!! Pms error: ");
+		Serial.println(status.getErrorMsg());
+	}
 }
