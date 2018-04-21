@@ -109,11 +109,11 @@ namespace pmsx {
         static const float DIAMETERS[DATA_SIZE];
         static const char* const METRICS[DATA_SIZE];
     public:
-        static constexpr size_t FRAME_SIZE = (DATA_SIZE + 3) * sizeof(pmsData_t); // usefull for waitForData()
+        static const size_t RESPONSE_FRAME_SIZE = (1 + 3) * sizeof(pmsData_t); // Frame size for single pmsData_t response (after write command)
+        static constexpr size_t FRAME_SIZE      = (DATA_SIZE + 3) * sizeof(pmsData_t); // usefull for waitForData()
         static constexpr size_t getFrameSize() {
             return FRAME_SIZE;
         } // usefull for waitForData()
-
     private:
         template <pmsIdx_t Ofset>
         class Names_ {
@@ -384,6 +384,7 @@ namespace pmsx {
             }
 
             for (; millis() - t0 < maxTime; delay(1)) {
+                skipGarbage();
                 if (available() >= nData) {
                     return true;
                 }
@@ -406,8 +407,7 @@ namespace pmsx {
                 return PmsStatus{PmsStatus::NO_DATA};
             }
 
-            pmsSerial->read();
-            // Value is equal to sig[0]. There is no need to check the value, it was checked by prior skipGarbage()
+            pmsSerial->read(); // Due to previous skipGarbage(): value is equal to sig[0]. There is no need to check the value
 
             if (pmsSerial->read() != sig[1]) {
                 return PmsStatus{PmsStatus::READ_ERROR}; // The rest of the buffer will be invalidated during the next read attempt
@@ -426,15 +426,11 @@ namespace pmsx {
             swapEndianBig16(&thisFrameLen);
 
             size_t toRead{thisFrameLen - sizeof thisFrameLen};
-
-            if (toRead != nData * sizeof*data) {
+            if (toRead > nData * sizeof*data) {
                 return PmsStatus{PmsStatus::FRAME_LENGTH_MISMATCH};
             }
-            if (data == nullptr) {
-                toRead = 0;
-            }
 
-            if (toRead) {
+            if (data != nullptr) {
                 if (pmsSerial->read((uint8_t*)data, toRead) != toRead) {
                     return PmsStatus{PmsStatus::READ_ERROR};
                 }
@@ -447,6 +443,7 @@ namespace pmsx {
 
             pmsData_t crc;
             for (; toRead < thisFrameLen; toRead += 2) {
+
                 if (pmsSerial->read((uint8_t*)&crc, sizeof crc) != sizeof crc) {
                     return PmsStatus{PmsStatus::READ_ERROR};
                 }
@@ -485,11 +482,18 @@ namespace pmsx {
             sumBuffer(&sum, (uint8_t*)&cmd, cmdSize);
             swapEndianBig16(&sum);
 
+            if (cmd != PmsCmd::CMD_READ_DATA && cmd != PmsCmd::CMD_MODE_ACTIVE) {
+                flushInput();
+            }
+
             if (pmsSerial->write((uint8_t*)&sum, sizeof sum) != sizeof sum) {
                 return false;
             }
 
-            if (cmd != PmsCmd::CMD_READ_DATA && cmd != PmsCmd::CMD_WAKEUP) {
+            if (cmd != PmsCmd::CMD_READ_DATA && cmd != PmsCmd::CMD_MODE_ACTIVE) {
+                // sensor sometimes tries to send response frame, containing original command (2 bytes)
+                skipGarbage();
+                waitForData(TIMEOUT_ACK, PmsData::RESPONSE_FRAME_SIZE);
                 flushInput();
             }
 
@@ -511,33 +515,6 @@ namespace pmsx {
                     break;
             }
 
-            if (cmd != PmsCmd::CMD_READ_DATA && cmd != PmsCmd::CMD_WAKEUP) {
-                const auto responseFrameSize = 8;
-                if (!waitForData(TIMEOUT_ACK, responseFrameSize)) {
-                    pmsSerial->flushInput();
-                    return true;
-                }
-                pmsData_t response = 0xCCCC;
-                read(&response, 1);
-            }
-
-            /*
-            if (cmd != PmsCmd::CMD_READ_DATA && cmd != PmsCmd::CMD_WAKEUP) {
-                const auto responseFrameSize = 8;
-                if (!waitForData(TIMEOUT_ACK, responseFrameSize)) {
-                    pmsSerial->flushInput();
-                    return false;
-                }
-                pmsData_t response = 0xCCCC;
-                if (read(&response, 1, 1) != PmsStatus::OK) {
-                    return false;
-                }
-                if (response >> 8 != (cmd & 0xFF)) {
-                    return false;
-                }
-            }
-
-            */
             return true;
         }
 

@@ -22,9 +22,21 @@ void setup(void) {
         Serial.println("Serial communication with PMS sensor failed");
         return;
     }
+    
     pms.write(pmsx::PmsCmd::CMD_WAKEUP);
     pms.write(pmsx::PmsCmd::CMD_MODE_ACTIVE);
     pms.waitForData(pmsx::Pms::WAKEUP_TIME);
+
+    pms.write(pmsx::PmsCmd::CMD_MODE_PASSIVE);
+
+    for ( auto i = 0; i < 100; ++i ) {
+        pms.write(pmsx::PmsCmd::CMD_SLEEP);
+        delay(50);
+        pms.write(pmsx::PmsCmd::CMD_WAKEUP);
+        delay(50);
+
+    }
+
 }
 
 ////////////////////////////////////////
