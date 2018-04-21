@@ -13,7 +13,7 @@ PmsAltSerial pmsSerial;
 Pms* pms_ = nullptr;
 #define pms (*pms_)
 #else
-Pms pms(&pmsSerial);
+pmsx::Pms pms(&pmsSerial);
 #endif
 
 // Green 8
@@ -33,12 +33,15 @@ void setup(void) {
     pms_ = new Pms(&pmsSerial);
     #else
     // ReSharper disable once CppExpressionWithoutSideEffects
-    pms.begin();
+    if (! pms.begin() ) {
+        Serial.println("Serial communication with PMS sensor failed");
+        return;
+    }
     #endif
 
-    pms.write(Pms::PmsCmd::CMD_WAKEUP);
-    pms.write(Pms::PmsCmd::CMD_MODE_ACTIVE);
-    pms.waitForData(Pms::WAKEUP_TIME);
+    pms.write(pmsx::PmsCmd::CMD_WAKEUP);
+    pms.write(pmsx::PmsCmd::CMD_MODE_ACTIVE);
+    pms.waitForData(pmsx::Pms::WAKEUP_TIME);
 }
 
 ////////////////////////////////////////
@@ -47,11 +50,11 @@ void setup(void) {
 void loop(void) {
 
     static auto lastRead = millis();
-    Pms::PmsData data;
+    pmsx::PmsData data;
     auto status = pms.read(data);
 
     switch (status) {
-        case Pms::PmsStatus::OK: {
+        case pmsx::PmsStatus::OK: {
             Serial.println("_________________");
             const auto newRead = millis();
             Serial.print("Wait time ");
@@ -73,7 +76,7 @@ void loop(void) {
             }
             break;
         }
-        case Pms::PmsStatus::NO_DATA:
+        case pmsx::PmsStatus::NO_DATA:
             break;
         default:
             Serial.print("!!! Pms error: ");

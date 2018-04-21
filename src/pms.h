@@ -5,6 +5,7 @@
 #include <pmsConfig.h>
 #include <pmsSerial.h>
 
+
 // Important: Use 3.3V logic
 // Pin 1: Vcc
 // Pin 2: GND
@@ -54,53 +55,19 @@ char (* __countof_helper(_CountofType (&_Array)[_SizeOfArray]))[_SizeOfArray];
 #define _countof(_Array) (sizeof(*__countof_helper(_Array)) + 0)
 
 #endif
+
+#if ! defined __INT24_MAX__
+// ReSharper disable once CppInconsistentNaming
+using __uint24 = uint32_t;
+#endif
+
 // ReSharper restore CppInconsistentNaming
 
 ////////////////////////////////////////
 
-class Pms {
-private:
-    const uint8_t sig[2]{0x42, 0x4D};
-    // TODO add getState
-    // TODO jeszcze jeden stan: working
-    tribool passive;
-    tribool sleep;
-    unsigned long timeout;
-    static constexpr decltype(timeout) TIMEOUT_PASSIVE = 68;   // Transfer time of 1start + 32data + 1stop using 9600bps is 33 usec. TIMEOUT_PASSIVE could be at least 34, Value of 68 is an arbitrary doubled
-    static constexpr auto TIMEOUT_ACK                  = 30U;  // Time to complete response after write command
-    static constexpr auto BAUD_RATE                    = 9600; // used during begin()
-    IPmsSerial* pmsSerial;
+namespace pmsx {
 
-public:
-    static constexpr auto WAKEUP_TIME = 2500U; // Experimentally, time to get ready after reset/wakeup
-
-    Pms() : passive(tribool(unknown)), sleep(tribool(unknown)), timeout(TIMEOUT_PASSIVE), pmsSerial(nullptr) { };
-
-    Pms(IPmsSerial* pmsSerial) : Pms() {
-        addSerial(pmsSerial);
-        #if defined PMS_DYNAMIC
-		begin();
-        #endif
-    }
-
-    ~Pms() {
-        #if defined PMS_DYNAMIC
-		end();
-        #endif
-    }
-
-    void addSerial(IPmsSerial* pmsSerial) {
-        this->pmsSerial = pmsSerial;
-    }
-
-    bool begin(void) const {
-        pmsSerial->setTimeout(TIMEOUT_PASSIVE);
-        return pmsSerial->begin(BAUD_RATE);
-    }
-
-    void end(void) const {
-        pmsSerial->end();
-    }
+    typedef uint16_t pmsData_t;
 
     class PmsStatus {
     public:
@@ -117,6 +84,7 @@ public:
         static constexpr pmsStatus_t READ_ERROR            = 1 + NO_DATA;
         static constexpr pmsStatus_t FRAME_LENGTH_MISMATCH = 1 + READ_ERROR;
         static constexpr pmsStatus_t SUM_ERROR             = 1 + FRAME_LENGTH_MISMATCH;
+        static constexpr pmsStatus_t NO_SERIAL             = 1 + SUM_ERROR;
 
     public:
         const char* getErrorMsg() {
@@ -126,26 +94,12 @@ public:
                 "Read error",
                 "Frame length mismatch",
                 "CRC Error",
+                "Serial port not initialized"
                 "Status:unknown"
             };
             return errorMsg[min(value, static_cast<decltype(value)> _countof(errorMsg))];
         }
     };
-
-    #if ! defined __INT24_MAX__
-    // ReSharper disable once CppInconsistentNaming
-    using __uint24 = uint32_t;
-    #endif
-
-    enum class PmsCmd : __uint24 {
-        CMD_READ_DATA = 0x0000e2L,
-        CMD_MODE_PASSIVE = 0x0000e1L,
-        CMD_MODE_ACTIVE = 0x0100e1L,
-        CMD_SLEEP = 0x0000e4L,
-        CMD_WAKEUP = 0x0100e4L
-    };
-
-    typedef uint16_t pmsData_t;
 
     class PmsData {
     public:
@@ -295,222 +249,303 @@ public:
 
     static_assert(sizeof(PmsData) == PmsData::DATA_SIZE * sizeof(pmsData_t), "PmsData: wrong sizeof()");
 
-    ////////////////////////////////////////
+    enum class PmsCmd : __uint24 {
+        CMD_READ_DATA = 0x0000e2L,
+        CMD_MODE_PASSIVE = 0x0000e1L,
+        CMD_MODE_ACTIVE = 0x0100e1L,
+        CMD_SLEEP = 0x0000e4L,
+        CMD_WAKEUP = 0x0100e4L
+    };
 
-    void __attribute__((always_inline))swapEndianBig16(uint16_t* x) {
-        constexpr union {
-            // endian.test16 == 0x0001 for low endian
-            // endian.test16 == 0x0100 for big endian
-            // should be properly optimized by compiler
-            uint16_t test16;
-            uint8_t test8[2];
-        } endian = {.test8 = {1, 0}};
+    class Pms {
+    private:
+        const uint8_t sig[2]{0x42, 0x4D};
+        // TODO add getState
+        // TODO jeszcze jeden stan: working
+        tribool passive;
+        tribool sleep;
+        unsigned long timeout;
+        static constexpr decltype(timeout) TIMEOUT_PASSIVE = 68;   // Transfer time of 1start + 32data + 1stop using 9600bps is 33 usec. TIMEOUT_PASSIVE could be at least 34, Value of 68 is an arbitrary doubled
+        static constexpr auto TIMEOUT_ACK                  = 30U;  // Time to complete response after write command
+        static constexpr auto BAUD_RATE                    = 9600; // used during begin()
+        IPmsSerial* pmsSerial;
 
-        if (endian.test16 != 0x0100) {
-            uint8_t hi = (*x & 0xff00) >> 8;
-            uint8_t lo = *x & 0xff;
-            *x         = lo << 8 | hi;
+    public:
+        static constexpr auto WAKEUP_TIME = 2500U; // Experimentally, time to get ready after reset/wakeup
+
+        Pms() : passive(tribool(unknown)), sleep(tribool(unknown)), timeout(TIMEOUT_PASSIVE), pmsSerial(nullptr) { };
+
+        Pms(IPmsSerial* pmsSerial) : Pms() {
+            addSerial(pmsSerial);
+            #if defined PMS_DYNAMIC
+            begin();
+            #endif
         }
-    }
 
-    ////////////////////////////////////////
-
-    void sumBuffer(uint16_t* sum, const uint8_t* buffer, uint16_t cnt) {
-        for (; cnt > 0; --cnt, ++buffer) {
-            *sum += *buffer;
+        ~Pms() {
+            #if defined PMS_DYNAMIC
+            end();
+            #endif
+            pmsSerial = nullptr;
         }
-    }
 
-    static void sumBuffer(uint16_t* sum, const uint16_t data) {
-        *sum += (data & 0xFF) + (data >> 8);
-    }
+        void addSerial(IPmsSerial* pmsSerial) {
+            this->pmsSerial = pmsSerial;
+        }
 
-    ////////////////////////////////////////
-
-    void setTimeout(decltype(timeout) timeout) {
-        this->timeout = timeout;
-        pmsSerial->setTimeout(timeout);
-    }
-
-    decltype(timeout) getTimeout(void) const {
-        return timeout;
-    }
-
-    size_t available(void) {
-        skipGarbage();
-        return pmsSerial->available();
-    }
-
-    void flushInput(void) const {
-        pmsSerial->flushInput();
-    }
-
-    bool waitForData(unsigned int maxTime, size_t nData = 0) {
-
-        const auto t0 = millis();
-        if (nData == 0) {
-            for (; millis() - t0 < maxTime; delay(1)) {
-                if (pmsSerial->available()) {
-                    return true;
-                }
+        bool begin(void) {
+            if (pmsSerial == nullptr) {
+                return false;
             }
+            pmsSerial->setTimeout(TIMEOUT_PASSIVE);
+            if (pmsSerial->begin(BAUD_RATE)) {
+                return true;
+            }
+            pmsSerial = nullptr;
+            return false;
+        }
+
+        void end(void) const {
+            if (pmsSerial != nullptr) {
+                pmsSerial->end();
+            }
+        }
+
+        ////////////////////////////////////////
+
+        void __attribute__((always_inline))swapEndianBig16(uint16_t* x) {
+            constexpr union {
+                // endian.test16 == 0x0001 for low endian
+                // endian.test16 == 0x0100 for big endian
+                // should be properly optimized by compiler
+                uint16_t test16;
+                uint8_t test8[2];
+            } endian = {.test8 = {1, 0}};
+
+            if (endian.test16 != 0x0100) {
+                uint8_t hi = (*x & 0xff00) >> 8;
+                uint8_t lo = *x & 0xff;
+                *x         = lo << 8 | hi;
+            }
+        }
+
+        ////////////////////////////////////////
+
+        void sumBuffer(uint16_t* sum, const uint8_t* buffer, uint16_t cnt) {
+            for (; cnt > 0; --cnt, ++buffer) {
+                *sum += *buffer;
+            }
+        }
+
+        static void sumBuffer(uint16_t* sum, const uint16_t data) {
+            *sum += (data & 0xFF) + (data >> 8);
+        }
+
+        ////////////////////////////////////////
+
+        void setTimeout(decltype(timeout) timeout) {
+            this->timeout = timeout;
+            if (pmsSerial != nullptr) {
+                pmsSerial->setTimeout(timeout);
+            }
+        }
+
+        decltype(timeout) getTimeout(void) const {
+            return timeout;
+        }
+
+        size_t available(void) {
+            if (pmsSerial == nullptr) {
+                return 0;
+            }
+            skipGarbage();
             return pmsSerial->available();
         }
 
-        for (; millis() - t0 < maxTime; delay(1)) {
-            if (available() >= nData) {
-                return true;
-            }
-        }
-        return available() >= nData;
-    }
-
-    PmsStatus read(PmsData& data) {
-        return read(reinterpret_cast<pmsData_t *>(&data.raw), data.raw.getSize());
-    }
-
-    PmsStatus read(pmsData_t* data, size_t nData) {
-        skipGarbage();
-
-        if (available() < (nData + 2) * sizeof*data + sizeof(sig)) {
-            return PmsStatus{PmsStatus::NO_DATA};
-        }
-
-        pmsSerial->read();
-        // Value is equal to sig[0]. There is no need to check the value, it was checked by prior skipGarbage()
-
-        if (pmsSerial->read() != sig[1]) {
-            return PmsStatus{PmsStatus::READ_ERROR}; // The rest of the buffer will be invalidated during the next read attempt
-        }
-
-        uint16_t sum{0};
-        sumBuffer(&sum, (uint8_t *)&sig, sizeof(sig));
-
-        pmsData_t thisFrameLen{0};
-
-        if (pmsSerial->read((uint8_t*)&thisFrameLen, sizeof thisFrameLen) != sizeof thisFrameLen) {
-            return PmsStatus{PmsStatus::READ_ERROR};
-        }
-
-        sumBuffer(&sum, thisFrameLen);
-        swapEndianBig16(&thisFrameLen);
-
-        size_t toRead{thisFrameLen - sizeof thisFrameLen};
-
-        if (toRead != nData * sizeof*data) {
-            return PmsStatus{PmsStatus::FRAME_LENGTH_MISMATCH};
-        }
-        if (data == nullptr) {
-            toRead = 0;
-        }
-
-        if (toRead) {
-            if (pmsSerial->read((uint8_t*)data, toRead) != toRead) {
-                return PmsStatus{PmsStatus::READ_ERROR};
-            }
-            sumBuffer(&sum, (uint8_t*)data, toRead);
-
-            for (size_t i = 0; i < nData; ++i) {
-                swapEndianBig16(&data[i]);
-            }
-        }
-
-        pmsData_t crc;
-        for (; toRead < thisFrameLen; toRead += 2) {
-            if (pmsSerial->read((uint8_t*)&crc, sizeof crc) != sizeof crc) {
-                return PmsStatus{PmsStatus::READ_ERROR};
-            }
-
-            if (toRead < thisFrameLen - 2) {
-                sumBuffer(&sum, crc);
-            }
-        }
-
-        swapEndianBig16(&crc);
-
-        if (sum != crc) {
-            return PmsStatus{PmsStatus::SUM_ERROR};
-        }
-
-        return PmsStatus{PmsStatus::OK};
-    }
-
-    bool write(PmsCmd cmd) {
-        static_assert(sizeof cmd >= 3, "Wrong definition of PmsCmd (too short)");
-
-        if (pmsSerial->write(sig, sizeof(sig)) != sizeof(sig)) {
-            return false;
-        }
-        const size_t cmdSize = 3;
-        if (pmsSerial->write((uint8_t*)&cmd, cmdSize) != cmdSize) {
-            return false;
-        }
-
-        uint16_t sum{0};
-        sumBuffer(&sum, sig, sizeof(sig));
-        sumBuffer(&sum, (uint8_t*)&cmd, cmdSize);
-        swapEndianBig16(&sum);
-
-        if (pmsSerial->write((uint8_t*)&sum, sizeof sum) != sizeof sum) {
-            return false;
-        }
-
-        if (cmd != PmsCmd::CMD_READ_DATA && cmd != PmsCmd::CMD_WAKEUP) {
-            flushInput();
-        }
-
-        switch (cmd) {
-            case PmsCmd::CMD_MODE_PASSIVE:
-                passive = tribool(true);
-                break;
-            case PmsCmd::CMD_MODE_ACTIVE:
-                passive = tribool(false);
-                break;
-            case PmsCmd::CMD_SLEEP:
-                sleep = tribool(true);
-                break;
-            case PmsCmd::CMD_WAKEUP:
-                sleep   = tribool(false);
-                passive = tribool(false);
-                break;
-            default:
-                break;
-        }
-
-        if (cmd != PmsCmd::CMD_READ_DATA && cmd != PmsCmd::CMD_WAKEUP) {
-            const auto responseFrameSize = 8;
-            if (!waitForData(TIMEOUT_ACK, responseFrameSize)) {
+        void flushInput(void) const {
+            if (pmsSerial != nullptr) {
                 pmsSerial->flushInput();
-                return true;
-            }
-            pmsData_t response = 0xCCCC;
-            read(&response, 1);
-        }
-
-        /*
-        if (cmd != PmsCmd::CMD_READ_DATA && cmd != PmsCmd::CMD_WAKEUP) {
-            const auto responseFrameSize = 8;
-            if (!waitForData(TIMEOUT_ACK, responseFrameSize)) {
-                pmsSerial->flushInput();
-                return false;
-            }
-            pmsData_t response = 0xCCCC;
-            if (read(&response, 1, 1) != PmsStatus::OK) {
-                return false;
-            }
-            if (response >> 8 != (cmd & 0xFF)) {
-                return false;
             }
         }
 
-        */
-        return true;
-    }
+        bool waitForData(unsigned int maxTime, size_t nData = 0) {
+            if (pmsSerial == nullptr) {
+                return false;
+            }
 
-private:
-    void skipGarbage() {
-        while ((pmsSerial->available()) && (pmsSerial->peek() != sig[0])) {
+            const auto t0 = millis();
+            if (nData == 0) {
+                for (; millis() - t0 < maxTime; delay(1)) {
+                    if (pmsSerial->available()) {
+                        return true;
+                    }
+                }
+                return pmsSerial->available();
+            }
+
+            for (; millis() - t0 < maxTime; delay(1)) {
+                if (available() >= nData) {
+                    return true;
+                }
+            }
+            return available() >= nData;
+        }
+
+        PmsStatus read(PmsData& data) {
+            return read(reinterpret_cast<pmsData_t *>(&data.raw), data.raw.getSize());
+        }
+
+        PmsStatus read(pmsData_t* data, size_t nData) {
+            if (pmsSerial == nullptr) {
+                return PmsStatus{PmsStatus::NO_SERIAL};
+            }
+
+            skipGarbage();
+
+            if (available() < (nData + 2) * sizeof*data + sizeof(sig)) {
+                return PmsStatus{PmsStatus::NO_DATA};
+            }
+
             pmsSerial->read();
+            // Value is equal to sig[0]. There is no need to check the value, it was checked by prior skipGarbage()
+
+            if (pmsSerial->read() != sig[1]) {
+                return PmsStatus{PmsStatus::READ_ERROR}; // The rest of the buffer will be invalidated during the next read attempt
+            }
+
+            uint16_t sum{0};
+            sumBuffer(&sum, (uint8_t *)&sig, sizeof(sig));
+
+            pmsData_t thisFrameLen{0};
+
+            if (pmsSerial->read((uint8_t*)&thisFrameLen, sizeof thisFrameLen) != sizeof thisFrameLen) {
+                return PmsStatus{PmsStatus::READ_ERROR};
+            }
+
+            sumBuffer(&sum, thisFrameLen);
+            swapEndianBig16(&thisFrameLen);
+
+            size_t toRead{thisFrameLen - sizeof thisFrameLen};
+
+            if (toRead != nData * sizeof*data) {
+                return PmsStatus{PmsStatus::FRAME_LENGTH_MISMATCH};
+            }
+            if (data == nullptr) {
+                toRead = 0;
+            }
+
+            if (toRead) {
+                if (pmsSerial->read((uint8_t*)data, toRead) != toRead) {
+                    return PmsStatus{PmsStatus::READ_ERROR};
+                }
+                sumBuffer(&sum, (uint8_t*)data, toRead);
+
+                for (size_t i = 0; i < nData; ++i) {
+                    swapEndianBig16(&data[i]);
+                }
+            }
+
+            pmsData_t crc;
+            for (; toRead < thisFrameLen; toRead += 2) {
+                if (pmsSerial->read((uint8_t*)&crc, sizeof crc) != sizeof crc) {
+                    return PmsStatus{PmsStatus::READ_ERROR};
+                }
+
+                if (toRead < thisFrameLen - 2) {
+                    sumBuffer(&sum, crc);
+                }
+            }
+
+            swapEndianBig16(&crc);
+
+            if (sum != crc) {
+                return PmsStatus{PmsStatus::SUM_ERROR};
+            }
+
+            return PmsStatus{PmsStatus::OK};
         }
-    }
-};
+
+        bool write(PmsCmd cmd) {
+            static_assert(sizeof cmd >= 3, "Wrong definition of PmsCmd (too short)");
+
+            if (pmsSerial == nullptr) {
+                return false;
+            }
+
+            if (pmsSerial->write(sig, sizeof(sig)) != sizeof(sig)) {
+                return false;
+            }
+            const size_t cmdSize = 3;
+            if (pmsSerial->write((uint8_t*)&cmd, cmdSize) != cmdSize) {
+                return false;
+            }
+
+            uint16_t sum{0};
+            sumBuffer(&sum, sig, sizeof(sig));
+            sumBuffer(&sum, (uint8_t*)&cmd, cmdSize);
+            swapEndianBig16(&sum);
+
+            if (pmsSerial->write((uint8_t*)&sum, sizeof sum) != sizeof sum) {
+                return false;
+            }
+
+            if (cmd != PmsCmd::CMD_READ_DATA && cmd != PmsCmd::CMD_WAKEUP) {
+                flushInput();
+            }
+
+            switch (cmd) {
+                case PmsCmd::CMD_MODE_PASSIVE:
+                    passive = tribool(true);
+                    break;
+                case PmsCmd::CMD_MODE_ACTIVE:
+                    passive = tribool(false);
+                    break;
+                case PmsCmd::CMD_SLEEP:
+                    sleep = tribool(true);
+                    break;
+                case PmsCmd::CMD_WAKEUP:
+                    sleep   = tribool(false);
+                    passive = tribool(false);
+                    break;
+                default:
+                    break;
+            }
+
+            if (cmd != PmsCmd::CMD_READ_DATA && cmd != PmsCmd::CMD_WAKEUP) {
+                const auto responseFrameSize = 8;
+                if (!waitForData(TIMEOUT_ACK, responseFrameSize)) {
+                    pmsSerial->flushInput();
+                    return true;
+                }
+                pmsData_t response = 0xCCCC;
+                read(&response, 1);
+            }
+
+            /*
+            if (cmd != PmsCmd::CMD_READ_DATA && cmd != PmsCmd::CMD_WAKEUP) {
+                const auto responseFrameSize = 8;
+                if (!waitForData(TIMEOUT_ACK, responseFrameSize)) {
+                    pmsSerial->flushInput();
+                    return false;
+                }
+                pmsData_t response = 0xCCCC;
+                if (read(&response, 1, 1) != PmsStatus::OK) {
+                    return false;
+                }
+                if (response >> 8 != (cmd & 0xFF)) {
+                    return false;
+                }
+            }
+
+            */
+            return true;
+        }
+
+    private:
+        void skipGarbage() {
+            while ((pmsSerial->available()) && (pmsSerial->peek() != sig[0])) {
+                pmsSerial->read();
+            }
+        }
+    };
+}

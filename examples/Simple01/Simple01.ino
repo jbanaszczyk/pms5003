@@ -3,7 +3,7 @@
 #include <pms.h>
 
 PmsAltSerial pmsSerial;
-Pms pms(&pmsSerial);
+pmsx::Pms pms(&pmsSerial);
 
 ////////////////////////////////////////
 
@@ -18,10 +18,13 @@ void setup(void) {
     while (!Serial) {}
     Serial.println("PMS5003");
 
-    pms.begin();
-    pms.write(Pms::PmsCmd::CMD_WAKEUP);
-    pms.write(Pms::PmsCmd::CMD_MODE_ACTIVE);
-    pms.waitForData(Pms::WAKEUP_TIME);
+    if (!pms.begin() ) {
+        Serial.println("Serial communication with PMS sensor failed");
+        return;
+    }
+    pms.write(pmsx::PmsCmd::CMD_WAKEUP);
+    pms.write(pmsx::PmsCmd::CMD_MODE_ACTIVE);
+    pms.waitForData(pmsx::Pms::WAKEUP_TIME);
 }
 
 ////////////////////////////////////////
@@ -31,11 +34,11 @@ void loop(void) {
 
     static auto lastRead = millis();
 
-    Pms::PmsData data;
+    pmsx::PmsData data;
     auto status = pms.read(data);
 
     switch (status) {
-        case Pms::PmsStatus::OK: {
+        case pmsx::PmsStatus::OK: {
             Serial.println("_________________");
             const auto newRead = millis();
             Serial.print("Wait time ");
@@ -56,7 +59,7 @@ void loop(void) {
             }
             break;
         }
-        case Pms::PmsStatus::NO_DATA:
+        case pmsx::PmsStatus::NO_DATA:
             break;
         default:
             Serial.print("!!! Pms error: ");
