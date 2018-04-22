@@ -16,10 +16,14 @@ Pms* pms_ = nullptr;
 pmsx::Pms pms(&pmsSerial);
 #endif
 
+// Brown GND
+// Black VCC +5V
+// All signal pins: 3.3 V logic
 // Green 8
 // Blue  9
-// Brown GND
-// Black VCC
+// optional
+//   white  7
+//   fiolet 6
 
 ////////////////////////////////////////
 
@@ -32,16 +36,35 @@ void setup(void) {
     #if defined PMS_DYNAMIC
     pms_ = new Pms(&pmsSerial);
     #else
-    // ReSharper disable once CppExpressionWithoutSideEffects
-    if (! pms.begin() ) {
+    if (! pms.begin()) {
         Serial.println("Serial communication with PMS sensor failed");
         return;
     }
     #endif
 
-    pms.write(pmsx::PmsCmd::CMD_WAKEUP);
+    pms.setPinReset(6);
+    pms.setPinSleepMode(7);
+
+    if (!pms.write(pmsx::PmsCmd::CMD_RESET)) {
+        pms.write(pmsx::PmsCmd::CMD_SLEEP);
+        pms.write(pmsx::PmsCmd::CMD_WAKEUP);
+    }
+    pms.write(pmsx::PmsCmd::CMD_MODE_PASSIVE);
+    pms.write(pmsx::PmsCmd::CMD_READ_DATA);
+    pms.waitForData(pmsx::Pms::TIMEOUT_PASSIVE, pmsx::PmsData::FRAME_SIZE);
+    pmsx::PmsData data;
+    auto status = pms.read(data);
+    if (status != pmsx::PmsStatus::OK) {
+        Serial.print("PMS sensor: ");
+        Serial.println(status.getErrorMsg());
+    }
     pms.write(pmsx::PmsCmd::CMD_MODE_ACTIVE);
-    pms.waitForData(pmsx::Pms::WAKEUP_TIME);
+    if (!pms.isWorking()) {
+        Serial.println("PMS sensor failed");
+    }
+
+    Serial.print("Time of setup(): ");
+    Serial.println(millis());
 }
 
 ////////////////////////////////////////
@@ -61,7 +84,7 @@ void loop(void) {
             Serial.println(newRead - lastRead);
             lastRead = newRead;
 
-            auto view = data.particles;
+            auto view   = data.particles;
             for (auto i = 0; i < view.SIZE; ++i) {
                 Serial.print(view[i]);
                 Serial.print("\t");

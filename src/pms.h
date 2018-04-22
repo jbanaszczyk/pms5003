@@ -94,7 +94,7 @@ namespace pmsx {
                 "Read error",
                 "Frame length mismatch",
                 "CRC Error",
-                "Serial port not initialized"
+                "Serial port not initialized",
                 "Status:unknown"
             };
             return errorMsg[min(value, static_cast<decltype(value)> _countof(errorMsg))];
@@ -254,28 +254,120 @@ namespace pmsx {
         CMD_MODE_PASSIVE = 0x0000e1L,
         CMD_MODE_ACTIVE = 0x0100e1L,
         CMD_SLEEP = 0x0000e4L,
-        CMD_WAKEUP = 0x0100e4L
+        CMD_WAKEUP = 0x0100e4L,
+        CMD_RESET = 0xffffffL,
     };
 
     class Pms {
     private:
-        const uint8_t sig[2]{0x42, 0x4D};
-        // TODO add getState
-        // TODO jeszcze jeden stan: working
-        tribool passive;
-        tribool sleep;
-        unsigned long timeout;
-        static constexpr decltype(timeout) TIMEOUT_PASSIVE = 68;   // Transfer time of 1start + 32data + 1stop using 9600bps is 33 usec. TIMEOUT_PASSIVE could be at least 34, Value of 68 is an arbitrary doubled
-        static constexpr auto TIMEOUT_ACK                  = 30U;  // Time to complete response after write command
-        static constexpr auto BAUD_RATE                    = 9600; // used during begin()
-        IPmsSerial* pmsSerial;
+
+        template <typename T, T NullValue>
+        class compact_optional {
+        private:
+            T storage;
+        public:
+            compact_optional() : storage(NullValue) { }
+            explicit compact_optional(T storage) : storage(storage) { }
+
+            void unSet() {
+                storage = NullValue;
+            }
+
+            T& operator=(const T& other) {
+                storage = other;
+                return storage;
+            }
+
+            bool hasValue() const {
+                return storage != NullValue;
+            }
+
+            explicit operator bool() const {
+                return hasValue();
+            }
+
+            T getValue() {
+                return storage;
+            }
+
+            operator T() const {
+                return storage;
+            }
+
+            const T& operator->() const {
+                return storage;
+            }
+
+        };
+
+        bool dataReceived;
+        bool dataSent;
+
+        tribool modeActive;
+        tribool modeSleep;
+
+        void clrState() {
+            dataReceived = false;
+            dataSent     = false;
+            modeActive   = tribool(unknown);
+            modeSleep    = tribool(unknown);
+            pinSleepMode.unSet();
+            pinReset.unSet();
+        }
 
     public:
-        static constexpr auto WAKEUP_TIME = 2500U; // Experimentally, time to get ready after reset/wakeup
+        tribool isModeActive() const {
+            return modeActive;
+        }
 
-        Pms() : passive(tribool(unknown)), sleep(tribool(unknown)), timeout(TIMEOUT_PASSIVE), pmsSerial(nullptr) { };
+        tribool isModeSleep() const {
+            return modeSleep;
+        }
 
-        Pms(IPmsSerial* pmsSerial) : Pms() {
+        bool isWorking() const {
+            return dataReceived && dataSent;
+        }
+
+    private:
+        using optionalPin_t = compact_optional<uint8_t, UINT8_MAX>;
+        optionalPin_t pinSleepMode;
+        optionalPin_t pinReset;
+
+        void setupHardwarePin(uint8_t value) {
+            digitalWrite(value, HIGH);
+            pinMode(value, OUTPUT);
+            digitalWrite(value, HIGH);
+        }
+
+    public:
+        void setPinSleepMode(uint8_t value) {
+            pinSleepMode = value;
+            setupHardwarePin(value);
+        }
+
+        void setPinReset(uint8_t value) {
+            pinReset = value;
+            setupHardwarePin(value);
+        }
+
+    private:
+        const uint8_t sig[2]{0x42, 0x4D};
+        unsigned long timeout;
+        static constexpr auto TIMEOUT_ACK             = 30U;  // Time to complete response after write command
+        static constexpr auto BAUD_RATE               = 9600U; // used during begin()
+        static constexpr unsigned long RESET_DURATION = 33U; // See doHwReset()
+
+        compact_optional<IPmsSerial*, nullptr> pmsSerial;
+
+    public:
+        static constexpr decltype(timeout) TIMEOUT_PASSIVE = 68U;  // Transfer time of 1start + 32data + 1stop using 9600bps is 33 usec. TIMEOUT_PASSIVE could be at least 34, Value of 68 is an arbitrary doubled
+        static constexpr auto WAKEUP_TIME                  = 2500U; // Experimentally, time to get ready after reset/wakeup
+
+        Pms() : modeActive(tribool(unknown)), modeSleep(tribool(unknown)), timeout(TIMEOUT_PASSIVE) {
+            addSerial(nullptr);
+        };
+
+        explicit Pms(IPmsSerial* pmsSerial) : Pms() {
             addSerial(pmsSerial);
             #if defined PMS_DYNAMIC
             begin();
@@ -286,34 +378,37 @@ namespace pmsx {
             #if defined PMS_DYNAMIC
             end();
             #endif
-            pmsSerial = nullptr;
+            pmsSerial.unSet();
         }
 
         void addSerial(IPmsSerial* pmsSerial) {
+            clrState();
             this->pmsSerial = pmsSerial;
         }
 
         bool begin(void) {
-            if (pmsSerial == nullptr) {
+            if (!pmsSerial) {
                 return false;
             }
+
             pmsSerial->setTimeout(TIMEOUT_PASSIVE);
             if (pmsSerial->begin(BAUD_RATE)) {
                 return true;
             }
-            pmsSerial = nullptr;
+            addSerial(nullptr);
             return false;
         }
 
         void end(void) const {
-            if (pmsSerial != nullptr) {
+            if (pmsSerial) {
                 pmsSerial->end();
             }
         }
 
         ////////////////////////////////////////
 
-        void __attribute__((always_inline))swapEndianBig16(uint16_t* x) {
+    private:
+        void __attribute__((always_inline))swapEndianBig16(uint16_t* value) {
             constexpr union {
                 // endian.test16 == 0x0001 for low endian
                 // endian.test16 == 0x0100 for big endian
@@ -323,9 +418,9 @@ namespace pmsx {
             } endian = {.test8 = {1, 0}};
 
             if (endian.test16 != 0x0100) {
-                uint8_t hi = (*x & 0xff00) >> 8;
-                uint8_t lo = *x & 0xff;
-                *x         = lo << 8 | hi;
+                const uint16_t hi = (*value & 0xff00) >> 8;
+                const uint16_t lo = (*value & 0x00ff) << 8;
+                *value            = lo | hi;
             }
         }
 
@@ -343,9 +438,10 @@ namespace pmsx {
 
         ////////////////////////////////////////
 
+    public:
         void setTimeout(decltype(timeout) timeout) {
             this->timeout = timeout;
-            if (pmsSerial != nullptr) {
+            if (pmsSerial) {
                 pmsSerial->setTimeout(timeout);
             }
         }
@@ -355,21 +451,15 @@ namespace pmsx {
         }
 
         size_t available(void) {
-            if (pmsSerial == nullptr) {
+            if (!pmsSerial) {
                 return 0;
             }
             skipGarbage();
             return pmsSerial->available();
         }
 
-        void flushInput(void) const {
-            if (pmsSerial != nullptr) {
-                pmsSerial->flushInput();
-            }
-        }
-
         bool waitForData(unsigned int maxTime, size_t nData = 0) {
-            if (pmsSerial == nullptr) {
+            if (!pmsSerial) {
                 return false;
             }
 
@@ -384,7 +474,6 @@ namespace pmsx {
             }
 
             for (; millis() - t0 < maxTime; delay(1)) {
-                skipGarbage();
                 if (available() >= nData) {
                     return true;
                 }
@@ -397,7 +486,7 @@ namespace pmsx {
         }
 
         PmsStatus read(pmsData_t* data, size_t nData) {
-            if (pmsSerial == nullptr) {
+            if (!pmsSerial) {
                 return PmsStatus{PmsStatus::NO_SERIAL};
             }
 
@@ -459,13 +548,79 @@ namespace pmsx {
                 return PmsStatus{PmsStatus::SUM_ERROR};
             }
 
+            dataReceived = true;
             return PmsStatus{PmsStatus::OK};
         }
 
-        bool write(PmsCmd cmd) {
+    private:
+        void setNewMode(const PmsCmd cmd) {
+            switch (cmd) {
+                case PmsCmd::CMD_MODE_PASSIVE:
+                    modeActive = tribool(false);
+                    break;
+                case PmsCmd::CMD_MODE_ACTIVE:
+                    modeActive = tribool(true);
+                    break;
+                case PmsCmd::CMD_SLEEP:
+                    modeSleep = tribool(true);
+                    break;
+                case PmsCmd::CMD_WAKEUP:
+                case PmsCmd::CMD_RESET:
+                    modeSleep  = tribool(false);
+                    modeActive = tribool(true);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        bool doHwReset(const unsigned int wakeupTime) {
+            if (!pinReset) {
+                return false;
+            }
+            digitalWrite(pinReset, LOW);
+            delay(RESET_DURATION);
+            pmsSerial->flushInput();
+            digitalWrite(pinReset, HIGH);
+            setNewMode(PmsCmd::CMD_RESET);
+            dataReceived = false;
+            dataSent     = false;
+            if (wakeupTime > 0) {
+                waitForData(wakeupTime, wakeupTime);
+                skipGarbage();
+            }
+            return true;
+        }
+
+        bool doHwSleep(const PmsCmd cmd, const unsigned int wakeupTime) {
+            if (!pinSleepMode) {
+                return false;
+            }
+
+            digitalWrite(pinSleepMode, cmd == PmsCmd::CMD_SLEEP ? LOW : HIGH);
+            delay(RESET_DURATION);
+            pmsSerial->flushInput();
+            setNewMode(cmd);
+            if ( cmd == PmsCmd::CMD_WAKEUP  && wakeupTime > 0 ) {
+                waitForData(wakeupTime, wakeupTime);
+                skipGarbage();
+            }
+            return true;
+        }
+
+    public:
+        bool write(PmsCmd cmd, unsigned int wakeupTime = Pms::WAKEUP_TIME) {
             static_assert(sizeof cmd >= 3, "Wrong definition of PmsCmd (too short)");
 
-            if (pmsSerial == nullptr) {
+            if (cmd == PmsCmd::CMD_RESET) {
+                return doHwReset(wakeupTime);
+            }
+
+            if ( ( cmd == PmsCmd::CMD_SLEEP || cmd == PmsCmd::CMD_WAKEUP ) && doHwSleep(cmd, wakeupTime) ) {
+                return true;
+            }
+
+            if (!pmsSerial) {
                 return false;
             }
 
@@ -483,7 +638,7 @@ namespace pmsx {
             swapEndianBig16(&sum);
 
             if (cmd != PmsCmd::CMD_READ_DATA && cmd != PmsCmd::CMD_MODE_ACTIVE) {
-                flushInput();
+                pmsSerial->flushInput();
             }
 
             if (pmsSerial->write((uint8_t*)&sum, sizeof sum) != sizeof sum) {
@@ -494,27 +649,17 @@ namespace pmsx {
                 // sensor sometimes tries to send response frame, containing original command (2 bytes)
                 skipGarbage();
                 waitForData(TIMEOUT_ACK, PmsData::RESPONSE_FRAME_SIZE);
-                flushInput();
+                pmsSerial->flushInput();
             }
 
-            switch (cmd) {
-                case PmsCmd::CMD_MODE_PASSIVE:
-                    passive = tribool(true);
-                    break;
-                case PmsCmd::CMD_MODE_ACTIVE:
-                    passive = tribool(false);
-                    break;
-                case PmsCmd::CMD_SLEEP:
-                    sleep = tribool(true);
-                    break;
-                case PmsCmd::CMD_WAKEUP:
-                    sleep   = tribool(false);
-                    passive = tribool(false);
-                    break;
-                default:
-                    break;
+            if ((cmd == PmsCmd::CMD_WAKEUP) && (wakeupTime > 0)) {
+                waitForData(wakeupTime, PmsData::RESPONSE_FRAME_SIZE);
+                skipGarbage();
             }
 
+            setNewMode(cmd);
+
+            dataSent = true;
             return true;
         }
 
@@ -524,5 +669,25 @@ namespace pmsx {
                 pmsSerial->read();
             }
         }
+
+        void serialMonitor(unsigned long int duration) {
+            if (!Serial) {
+                return;
+            }
+
+            const auto t0 = millis();
+            Serial.println("==[ Port monitor ]==");
+
+            for (; millis() - t0 < duration; delay(1)) {
+                while (pmsSerial->available()) {
+                    Serial.print("==  ");
+                    Serial.print(millis() - t0);
+                    Serial.print(" : ");
+                    Serial.println(pmsSerial->read());
+                }
+            }
+            Serial.println("==[              ]==");
+        }
+
     };
 }
