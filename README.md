@@ -1,20 +1,56 @@
-# Before
-
-Current version is under development, may be not stable enough. Please refer to the latest release: https://github.com/jbanaszczyk/pms5003/releases
-
 # pms5003
 
 I'm proud to present my Arduino library supporting PMS5003 Air Quality Sensor.
 
+## Status
+
+### Current revision: 2.00 RC
+
+Not released yet as a release
+
+Code in repository (branch: master) is 2.00 RC
+* It looks stable - development is finished
+* README have to be updated
+* There are some TODOs for next revisions
+
+### Good, stable revision: 1.00
+
+Previous releases are available here: https://github.com/jbanaszczyk/pms5003/releases
+
+There is one interesting fork supporting ESP8266: https://github.com/riverscn/pmsx003
+
+## Other boards
+
+Probably my library supports Plantover PMS700x, PMS300x without any problems.
+
+If you are interested in support of your sensor: feel free to ask.
+
 ## Features
 
-* Supports all Plantover PMS5003 features (sleep/wake up, passive/active modes),
+* Supports all Plantover PMS5003 features (sleep/wake up, passive/active modes, hardware pins),
 * Probably works fine with PMS7003 and PMS3003,
 * Highly customizable:
   * Uses any serial communication library,
   * You have a choice to use or not to use: global variables or class instances.
 * Written from scratch,
-* Written in modern C++.
+* Written in modern C++11.
+
+## TODO
+
+* Some checks: API
+  * checkResetPin - check if declared reset pin works fine (if it resets the sensor)
+  * checkSleepPin - check if declared sleep/wake up pin works fine
+* Support for platforms
+  * Library should support Arduino itself (not checked yet :)
+  * More platforms:
+    * PlatformIO
+    * CLion
+    * ...
+* Support for boards:
+  * planning ESP8266 support
+* Add unit tests
+  * I'm sorry, there are no unit tests :(
+
 
 ## Preparation
 
@@ -25,7 +61,7 @@ Let's use [DrDiettrich' fork of AltSoftSerial Library](https://github.com/DrDiet
 
 Make some connections:
 * **Important**: pms5003 uses 3.3V logic. Make sure your Arduino board uses 3.3V logic too, use converters if required.
-* PMS5003 Pin 1: Vcc
+* PMS5003 Pin 1: VCC
 * PMS5003 Pin 2: GND
 * PMS5003 Pin 4: Digital pin 9 (there is no choice, forced by AltSerial)
 * PMS5003 Pin 5: Digital pin 8 (there is no choice)
