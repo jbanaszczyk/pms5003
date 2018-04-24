@@ -436,7 +436,7 @@ namespace pmsx {
             *sum += (data & 0xFF) + (data >> 8);
         }
 
-        ////////////////////////////////////////
+        //////////////////////////////////////// 
 
     public:
         void setTimeout(decltype(timeout) timeout) {

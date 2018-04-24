@@ -1,5 +1,3 @@
-// #include <Arduino.h>
-
 #include <pms.h>
 
 PmsAltSerial pmsSerial;
@@ -7,14 +5,16 @@ pmsx::Pms pms(&pmsSerial);
 
 ////////////////////////////////////////
 
-// Brown GND
-// Black VCC +5V
-// All signal pins: 3.3 V logic
-// Green 8
-// Blue  9
-// optional
-//   white  7
-//   fiolet 6
+// * PMS5003 Pin 1 (black) : VCC +5V
+// * PMS5003 Pin 2 (brown) : GND 
+// Important: pms5003 uses 3.3V logic.Use converters if required or make sure your Arduino board uses 3.3V logic too.
+// * PMS5003 Pin 4 (blue) : Digital pin 9 (there is no choice, forced by AltSerial)
+// * PMS5003 Pin 5 (green) : Digital pin 8 (there is no choice, forced by AltSerial)
+// * Optional
+//   * PMS5003 Pin 3 (white) : Digital pin 7 (can be changed or not connected at all)
+//   * PMS5003 Pin 6 (violet) : Digital pin 6 (can be changed or not connected at all)
+
+////////////////////////////////////////
 
 // ReSharper disable once CppInconsistentNaming
 void setup(void) {

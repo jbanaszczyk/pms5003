@@ -6,16 +6,29 @@ I'm proud to present my Arduino library supporting PMS5003 Air Quality Sensor.
 
 ### Current revision: 2.00 RC
 
-Not released yet as a release
+It is not published as a release
 
 Code in repository (branch: master) is 2.00 RC
 * It looks stable - development is finished
 * README have to be updated
 * There are some TODOs for next revisions
 
+### What is new?
+
+Release 2.0 brings a lot of changes and improvements:
+
+* API contract (class names and methods) is completely rewritten. It is not compatible with v1.0. Sorry :(
+* Minor bugs are fixed (nothing important, release 1.00 should be assumed as stable).
+* Added support for sensor hardware pins (pin 3 - SET, pin 6 - RESET).
+* Added support for more serial port libraries (inversion of control).
+* Added support for unit tests (soon).
+* Added support for ISO 14644-1: Classification of air cleanliness.
+* Added more diagnostic checks
+* Added support for "views" (will be described later) - the most exciting new feature.
+
 ### Good, stable revision: 1.00
 
-Previous releases are available here: https://github.com/jbanaszczyk/pms5003/releases
+Previous releases are available: https://github.com/jbanaszczyk/pms5003/releases
 
 There is one interesting fork supporting ESP8266: https://github.com/riverscn/pmsx003
 
@@ -28,20 +41,21 @@ If you are interested in support of your sensor: feel free to ask.
 ## Features
 
 * Supports all Plantover PMS5003 features (sleep/wake up, passive/active modes, hardware pins),
-* Probably works fine with PMS7003 and PMS3003,
 * Highly customizable:
   * Uses any serial communication library,
   * You have a choice to use or not to use: global variables or class instances.
 * Written from scratch,
 * Written in modern C++11.
+* __The main goal__: Reading data from the sensor does not block. Your process receives the status `OK` or `NO_DATA` or some kinds of errors, but your process never waits for the data.
+* Provides support for ISO 14644-1 classification of air cleanliness levels.
 
 ## TODO
 
-* Some checks: API
+* New API/methods: some checks
   * checkResetPin - check if declared reset pin works fine (if it resets the sensor)
   * checkSleepPin - check if declared sleep/wake up pin works fine
+* Use PROGMEM to store some static data (mostly strings)
 * Support for platforms
-  * Library should support Arduino itself (not checked yet :)
   * More platforms:
     * PlatformIO
     * CLion
@@ -49,105 +63,339 @@ If you are interested in support of your sensor: feel free to ask.
 * Support for boards:
   * planning ESP8266 support
 * Add unit tests
-  * I'm sorry, there are no unit tests :(
-
+  * There are no unit tests yet :(
 
 ## Preparation
 
-Install pms5003 library.
+### IDE & OS
 
-Let's use [DrDiettrich' fork of AltSoftSerial Library](https://github.com/DrDiettrich/AltSoftSerial.git). Install it.
+pms5003 library is developed using:
+* Visual Studio Community 2017 (Windows)
+* Arduino IDE for Visual Studio: http://www.visualmicro.com/
+
+pms5003 library was successfully checked using:
+* Arduino 1.8.5 (Windows)
+
+### Dependencies
+
+Current version uses [DrDiettrich' fork of AltSoftSerial Library](https://github.com/DrDiettrich/AltSoftSerial.git). Install it.
 * pms5003 will not compile using original AltSoftSerial lib.
 
-Make some connections:
-* **Important**: pms5003 uses 3.3V logic. Make sure your Arduino board uses 3.3V logic too, use converters if required.
-* PMS5003 Pin 1: VCC
-* PMS5003 Pin 2: GND
-* PMS5003 Pin 4: Digital pin 9 (there is no choice, forced by AltSerial)
-* PMS5003 Pin 5: Digital pin 8 (there is no choice)
+### Library
 
-## Applications
+Install pms5003 library.
 
-### Hello. The Basic scenario.<a name="Hello"></a>
+### Connections
 
-Use the code: https://github.com/jbanaszczyk/pms5003/tree/master/examples/01_Simple
+* PMS5003 Pin 1 (black): VCC +5V
+* PMS5003 Pin 2 (brown): GND
+
+**Important**: pms5003 uses 3.3V logic. Use converters if required or make sure your Arduino board uses 3.3V logic too.
+* PMS5003 Pin 4 (blue): Digital pin 9 (there is no choice, forced by AltSerial)
+* PMS5003 Pin 5 (green): Digital pin 8 (there is no choice, forced by AltSerial)
+* Optional
+  * PMS5003 Pin 3 (white): Digital pin 7 (can be changed or not connected at all)
+  * PMS5003 Pin 6 (violet): Digital pin 6 (can be changed or not connected at all)
+
+# Applications
+
+## Hello. The Basic scenario.<a name="Hello"></a>
+
+Use the code: https://github.com/jbanaszczyk/pms5003/blob/master/examples/Simple01/Simple01.ino
 
 ```C++
-#include <Arduino.h>
 #include <pms.h>
 
-Pms pms;
+PmsAltSerial pmsSerial;
+pmsx::Pms pms(&pmsSerial);
 
 ////////////////////////////////////////
 
 void setup(void) {
-	Serial.begin(115200);
-	while (!Serial) {};
-	Serial.println("PMS5003");
+    Serial.begin(115200);
+    while (!Serial) {}
+    Serial.println("PMS5003");
 
-	pms.begin();
-	pms.waitForData(Pms::WAKEUP_TIME);
-	pms.write(Pms::CMD_MODE_ACTIVE);
+    if (!pms.begin()) {
+        Serial.println("PMS sensor: communication failed");
+        return;
+    }    
+
+    pms.setPinReset(6);
+    pms.setPinSleepMode(7);
+
+    if (!pms.write(pmsx::PmsCmd::CMD_RESET)) {
+        pms.write(pmsx::PmsCmd::CMD_SLEEP);
+        pms.write(pmsx::PmsCmd::CMD_WAKEUP);
+    }
+    pms.write(pmsx::PmsCmd::CMD_MODE_PASSIVE);
+    pms.write(pmsx::PmsCmd::CMD_READ_DATA);
+    pms.waitForData(pmsx::Pms::TIMEOUT_PASSIVE, pmsx::PmsData::FRAME_SIZE);
+    pmsx::PmsData data;
+    auto status = pms.read(data);
+    if (status != pmsx::PmsStatus::OK) {
+        Serial.print("PMS sensor: ");
+        Serial.println(status.getErrorMsg());
+    }
+    pms.write(pmsx::PmsCmd::CMD_MODE_ACTIVE);
+    if (!pms.isWorking()) {
+        Serial.println("PMS sensor failed");
+    }
+
+    Serial.print("Time of setup(): ");
+    Serial.println(millis());
 }
 
 ////////////////////////////////////////
 
-auto lastRead = millis();
-
 void loop(void) {
 
-	const auto n = Pms::RESERVED;
-	Pms::pmsData_t data[n];
+    static auto lastRead = millis();
 
-	Pms::PmsStatus status = pms.read(data, n);
+    pmsx::PmsData data;
+    auto status = pms.read(data);
 
-	switch (status) {
-		case Pms::PmsStatus::OK:
-		{
-			Serial.println("_________________");
-			auto newRead = millis();
-			Serial.print("Wait time ");
-			Serial.println(newRead - lastRead);
-			lastRead = newRead;
+    switch (status) {
+    case pmsx::PmsStatus::OK: {
+        Serial.println("_________________");
+        const auto newRead = millis();
+        Serial.print("Wait time ");
+        Serial.println(newRead - lastRead);
+        lastRead = newRead;
 
-			// For loop starts from 3
-			// Skip the first three data (PM_1_DOT_0_CF1, PM_2_DOT_5_CF1, PM10CF1)
-			for (size_t i = Pms::PM_1_DOT_0; i < n; ++i) {
-				Serial.print(data[i]);
-				Serial.print("\t");
-				Serial.print(Pms::dataNames[i]);
-				Serial.print(" [");
-				Serial.print(Pms::metrics[i]);
-				Serial.print("]");
-				Serial.println();
-			}
-			break;
-		}
-		case Pms::PmsStatus::NO_DATA:
-			break;
-		default:
-			Serial.println("_________________");
-			Serial.println(Pms::errorMsg[status]);
-	};
+        auto view = data.particles;
+        for (auto i = 0; i < view.getSize(); ++i) {
+            Serial.print(view[i]);
+            Serial.print("\t");
+            Serial.print(view.getName(i));
+
+            Serial.print(" [");
+            Serial.print(view.getMetric(i));
+            Serial.print("] ");
+            Serial.print(view.getLevel(i));
+            Serial.println();
+        }
+        break;
+    }
+    case pmsx::PmsStatus::NO_DATA:
+        break;
+    default:
+        Serial.print("!!! Pms error: ");
+        Serial.println(status.getErrorMsg());
+    }
 }
-
+// Program size: 10 166 bytes (used 32% of a 32 256 byte maximum)
+// Minimum Memory Usage: 1045 bytes (51% of a 2048 byte maximum)
 ```
 
 And the result is (something like this):
-
 ```
+PMS5003
+Time of setup(): 2589
 _________________
-Wait time 836
-7	PM1.0 [mcg/m3]
-8	PM2.5 [mcg/m3]
-8	PM10. [mcg/m3]
-1368	Particles < 0.3 micron [/0.1L]
-361	Particles > 0.5 micron [/0.1L]
-43	Particles > 1.0 micron [/0.1L]
-1	Particles > 2.5 micron [/0.1L]
-0	Particles > 5.0 micron [/0.1L]
-0	Particles > 10. micron [/0.1L]
+Wait time 124
+0	Particles > 0.3 micron [/0.1L] 0.00
+0	Particles > 0.5 micron [/0.1L] 0.00
+0	Particles > 1.0 micron [/0.1L] 0.00
+0	Particles > 2.5 micron [/0.1L] 0.00
+0	Particles > 5.0 micron [/0.1L] 0.00
+0	Particles > 10. micron [/0.1L] 0.00
+_________________
+Wait time 911
+10647	Particles > 0.3 micron [/0.1L] 9.02
+3306	Particles > 0.5 micron [/0.1L] 8.97
+3036	Particles > 1.0 micron [/0.1L] 9.56
+0	Particles > 2.5 micron [/0.1L] 0.00
+0	Particles > 5.0 micron [/0.1L] 0.00
+0	Particles > 10. micron [/0.1L] 0.00
 ```
+
+## More about the example
+
+### Before
+
+To use the library:
+* install the [pms5003 library](https://github.com/jbanaszczyk/pms5003)
+* install [DrDiettrich' fork of AltSoftSerial Library](https://github.com/DrDiettrich/AltSoftSerial.git)
+* include the header `#include <pms.h>`
+
+```C++
+#include <pms.h>
+```
+
+Create instance of serial driver
+
+```C++
+PmsAltSerial pmsSerial;
+```
+
+Create instance of pmsx::Pms object:
+* library namespace name is `pmsx`
+* class name of the object is `Pms`
+* object is named `pms`
+* object uses previously created driver `pmsSerial`
+
+```C++
+pmsx::Pms pms(&pmsSerial);
+```
+
+### setup()
+
+Communicate PMS sensor and serial library. If they can't communicate - there is no sense for the next steps.
+
+pms5003 takes care on protocol details (speed, data length, parity and so on).
+
+```C++
+    if (!pms.begin()) {
+        Serial.println("PMS sensor: communication failed");
+        return;
+    }
+```
+
+The next step is to define Arduino pins connected to pms5003:
+* SET (pms5003 - pin 3, white) (sleep/wakeup)
+* RESET (pms5003 - pin 6, violet) (sensor reset)
+
+This step is optional. 
+* If SET pin is not connected - sleep/wakeup commands are executed using serial connection
+* If RESET pin is not connected - sleep and then wakeup works like reset
+
+If pins are not connected - just remove appropriate `setPinReset`/`setPinSleepMode` lines
+
+```C++
+    pms.setPinReset(6);
+    pms.setPinSleepMode(7);
+```
+
+The next task is to put sensor in a well known state. 
+There are two aspects of PMS5003 state:
+* sleep/waken up
+* passive/active
+
+Both can be examined using `isModeActive()`/`isModeSleep()`. Please note, that result value is a tristate logic `tribool`: yes / no / I don't know. Please refer to [boost `tribool` library description](https://www.boost.org/doc/libs/1_67_0/doc/html/tribool.html)
+
+Please note, that it is possible, that Arduino was restarted, but PMS5003 was set in a strange state.
+
+Well known state (woken up and active) can be achieved after sensor reset or sleep+wakeup sequence
+
+```C++
+    if (!pms.write(pmsx::PmsCmd::CMD_RESET)) {
+        pms.write(pmsx::PmsCmd::CMD_SLEEP);
+        pms.write(pmsx::PmsCmd::CMD_WAKEUP);
+    }
+```
+
+The next task is to make sure, that Arduino can communicate with PMS5003. To accomplish the task we are:
+* forcing passive mode (PMS5003 sends data if asked), 
+* ask for data, 
+* wait for the response 
+* and check the response
+
+```C++
+    pms.write(pmsx::PmsCmd::CMD_MODE_PASSIVE);
+    pms.write(pmsx::PmsCmd::CMD_READ_DATA);
+    pms.waitForData(pmsx::Pms::TIMEOUT_PASSIVE, pmsx::PmsData::FRAME_SIZE);
+    pmsx::PmsData data;
+    auto status = pms.read(data);
+    if (status != pmsx::PmsStatus::OK) {
+        Serial.print("PMS sensor: ");
+        Serial.println(status.getErrorMsg());
+    }
+    if (!pms.isWorking()) {
+        Serial.println("PMS sensor failed");
+    }
+```
+
+Finally we put PMS5003 in active mode - it sends data periodically.
+
+```C++
+    pms.write(pmsx::PmsCmd::CMD_MODE_ACTIVE);
+```
+
+### loop()
+
+First of all: __pms5003 does not block on data read__ 
+
+Try to read the data :
+
+```C++
+    pmsx::PmsData data;
+    auto status = pms.read(data);
+
+    switch (status) {
+```
+
+If there is something interesting - display it:
+
+```C++
+    case pmsx::PmsStatus::OK: {
+        ....
+```
+
+If there is are no data: do something else:
+
+```C++
+    case pmsx::PmsStatus::NO_DATA:
+        break;
+```
+
+In case of error: show the error message:
+
+```C++
+    default:
+        Serial.print("!!! Pms error: ");
+        Serial.println(status.getErrorMsg());
+    }
+```
+
+If there is something interesting (again):
+
+```C++
+    case pmsx::PmsStatus::OK: {
+```
+
+Data received form PMS5003 (see [Appendix I](https://github.com/jbanaszczyk/pms5003/blob/master/doc/pms5003-manual_v2-3.pdf) can be interesting
+* as a whole (13 numbers)
+* or can be grouped
+  * (3 numbers) PM 1.0/2.5/10.0 concentration unit µ g/m3(CF=1,standard particle) (_really? I have no idea what does it mean_)
+  * (3 numbers) PM 1.0/2.5/10.0 concentration unit µ g/m3(under atmospheric environment) (_looks good_)
+  * (6 numbers) the number of particles with diameter beyond 0.3/0.5/1.0/2.5/5.0/10.0 um in 0.1 L of air (_very tasty data, it fit into ISO 14644-1 classification of air cleanliness levels_)
+  * (1 number) reserved data, without any real meaning
+
+
+```C++
+        auto view = data.particles;
+        for (auto i = 0; i < view.getSize(); ++i) {
+            Serial.print(view[i]);
+            Serial.print("\t");
+            Serial.print(view.getName(i));
+
+            Serial.print(" [");
+            Serial.print(view.getMetric(i));
+            Serial.print("] ");
+            Serial.print(view.getLevel(i));
+            Serial.println();
+        }
+        break;
+    }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # API<a name="API"></a>
 
