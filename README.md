@@ -42,18 +42,19 @@ If you are interested in support of your sensor: feel free to ask.
 
 * Supports all Plantover PMS5003 features (sleep/wake up, passive/active modes, hardware pins),
 * Highly customizable:
-  * Uses any serial communication library,
-  * You have a choice to use or not to use: global variables or class instances.
+  * Uses almost any serial communication library,
+  * You have a choice to use or not to use: (C style) global variables or (C++ style) class instances.
 * Written from scratch,
 * Written in modern C++11.
-* __The main goal__: Reading data from the sensor does not block. Your process receives the status `OK` or `NO_DATA` or some kinds of errors, but your process never waits for the data.
+* It is "headers only" library.
+* __The main goal__: Reading data from the sensor does not block. Your process receives the status `OK` or `NO_DATA` or some kinds of errors but your process never waits for the data.
 * Provides support for ISO 14644-1 classification of air cleanliness levels.
 
 ## TODO
 
-* New API/methods: some checks
-  * checkResetPin - check if declared reset pin works fine (if it resets the sensor)
-  * checkSleepPin - check if declared sleep/wake up pin works fine
+* New methods: some more checks
+  * checkResetPin - check if declared reset pin works fine (check if it resets the sensor)
+  * checkSleepPin - check if declared sleep/wake up pin is properly connected
 * Use PROGMEM to store some static data (mostly strings)
 * Support for platforms
   * More platforms:
@@ -61,7 +62,7 @@ If you are interested in support of your sensor: feel free to ask.
     * CLion
     * ...
 * Support for boards:
-  * planning ESP8266 support
+  * ESP8266 support
 * Add unit tests
   * There are no unit tests yet :(
 
@@ -78,8 +79,9 @@ pms5003 library was successfully checked using:
 
 ### Dependencies
 
-Current version uses [DrDiettrich' fork of AltSoftSerial Library](https://github.com/DrDiettrich/AltSoftSerial.git). Install it.
-* pms5003 will not compile using original AltSoftSerial lib.
+* Current version uses [DrDiettrich' fork of AltSoftSerial Library](https://github.com/DrDiettrich/AltSoftSerial.git). Install it.
+  * pms5003 will not compile using original AltSoftSerial lib.
+* pms5003 will not compile using old Arduino IDE.
 
 ### Library
 
@@ -91,11 +93,11 @@ Install pms5003 library.
 * PMS5003 Pin 2 (brown): GND
 
 **Important**: pms5003 uses 3.3V logic. Use converters if required or make sure your Arduino board uses 3.3V logic too.
-* PMS5003 Pin 4 (blue): Digital pin 9 (there is no choice, forced by AltSerial)
-* PMS5003 Pin 5 (green): Digital pin 8 (there is no choice, forced by AltSerial)
+* PMS5003 Pin 4 (blue): Arduino pin 9 (there is no choice, it is forced by AltSerial)
+* PMS5003 Pin 5 (green): Arduino pin 8 (there is no choice, it is forced by AltSerial)
 * Optional
-  * PMS5003 Pin 3 (white): Digital pin 7 (can be changed or not connected at all)
-  * PMS5003 Pin 6 (violet): Digital pin 6 (can be changed or not connected at all)
+  * PMS5003 Pin 3 (white): Arduino pin 7 (can be changed or not connected at all)
+  * PMS5003 Pin 6 (violet): Arduino pin 6 (can be changed or not connected at all)
 
 # Applications
 
@@ -165,7 +167,7 @@ void loop(void) {
 
         auto view = data.particles;
         for (auto i = 0; i < view.getSize(); ++i) {
-            Serial.print(view[i]);
+            Serial.print(view.getValue(i));
             Serial.print("\t");
             Serial.print(view.getName(i));
 
@@ -215,8 +217,8 @@ Wait time 911
 ### Before
 
 To use the library:
-* install the [pms5003 library](https://github.com/jbanaszczyk/pms5003)
-* install [DrDiettrich' fork of AltSoftSerial Library](https://github.com/DrDiettrich/AltSoftSerial.git)
+* install the [pms5003 library](https://github.com/jbanaszczyk/pms5003/archive/master.zip)
+* install [DrDiettrich' fork of AltSoftSerial Library](https://github.com/DrDiettrich/AltSoftSerial/archive/master.zip)
 * include the header `#include <pms.h>`
 
 ```C++
@@ -241,7 +243,7 @@ pmsx::Pms pms(&pmsSerial);
 
 ### setup()
 
-Communicate PMS sensor and serial library. If they can't communicate - there is no sense for the next steps.
+Initialize serial library. If Arduino can't communicate with PMS5003 - there is no sense to perform the next steps.
 
 pms5003 takes care on protocol details (speed, data length, parity and so on).
 
@@ -253,14 +255,14 @@ pms5003 takes care on protocol details (speed, data length, parity and so on).
 ```
 
 The next step is to define Arduino pins connected to pms5003:
-* SET (pms5003 - pin 3, white) (sleep/wakeup)
-* RESET (pms5003 - pin 6, violet) (sensor reset)
+* SET (pms5003 pin 3, white) (sleep/wakeup)
+* RESET (pms5003 pin 6, violet) (sensor reset)
 
 This step is optional. 
 * If SET pin is not connected - sleep/wakeup commands are executed using serial connection
 * If RESET pin is not connected - sleep and then wakeup works like reset
 
-If pins are not connected - just remove appropriate `setPinReset`/`setPinSleepMode` lines
+If pins are not connected - just remove appropriate `setPinReset`/`setPinSleepMode` lines.
 
 ```C++
     pms.setPinReset(6);
@@ -272,9 +274,9 @@ There are two aspects of PMS5003 state:
 * sleep/waken up
 * passive/active
 
-Both can be examined using `isModeActive()`/`isModeSleep()`. Please note, that result value is a tristate logic `tribool`: yes / no / I don't know. Please refer to [boost `tribool` library description](https://www.boost.org/doc/libs/1_67_0/doc/html/tribool.html)
+Both can be examined using `isModeActive()`/`isModeSleep()`. Please note, that result value is a tristate logic `tribool`: Yes / No / I don't know. Please refer to [boost `tribool` library description](https://www.boost.org/doc/libs/1_67_0/doc/html/tribool.html)
 
-Please note, that it is possible, that Arduino was restarted, but PMS5003 was set in a strange state.
+Please note, that it is possible, that Arduino was restarted, but PMS5003 was set in a strange state and it was not restarted.
 
 Well known state (woken up and active) can be achieved after sensor reset or sleep+wakeup sequence
 
@@ -306,7 +308,7 @@ The next task is to make sure, that Arduino can communicate with PMS5003. To acc
     }
 ```
 
-Finally we put PMS5003 in active mode - it sends data periodically.
+Finally we put PMS5003 in active mode - it sends data periodically and automatically.
 
 ```C++
     pms.write(pmsx::PmsCmd::CMD_MODE_ACTIVE);
@@ -348,32 +350,72 @@ In case of error: show the error message:
     }
 ```
 
-If there is something interesting (again):
+Go back to the situation where there is something interesting:
 
 ```C++
     case pmsx::PmsStatus::OK: {
 ```
 
-Data received form PMS5003 (see [Appendix I](https://github.com/jbanaszczyk/pms5003/blob/master/doc/pms5003-manual_v2-3.pdf) can be interesting
+#### views
+
+Data received form PMS5003 (see [Appendix I](https://github.com/jbanaszczyk/pms5003/blob/master/doc/pms5003-manual_v2-3.pdf)) may be worth attention:
 * as a whole (13 numbers)
-* or can be grouped
-  * (3 numbers) PM 1.0/2.5/10.0 concentration unit µ g/m3(CF=1,standard particle) (_really? I have no idea what does it mean_)
-  * (3 numbers) PM 1.0/2.5/10.0 concentration unit µ g/m3(under atmospheric environment) (_looks good_)
+* in groups:
+  * (3 numbers) PM 1.0/2.5/10.0 concentration unit µ g/m3 (CF=1,standard particle) (_really? I have no idea what does it mean_)
+  * (3 numbers) PM 1.0/2.5/10.0 concentration unit µ g/m3 (under atmospheric environment) (_looks good_)
   * (6 numbers) the number of particles with diameter beyond 0.3/0.5/1.0/2.5/5.0/10.0 um in 0.1 L of air (_very tasty data, it fit into ISO 14644-1 classification of air cleanliness levels_)
   * (1 number) reserved data, without any real meaning
 
+To get access to them use:
+
+```C++
+        auto view = data.raw;
+```
+
+or
+
+```C++
+        auto view = data.concentrationCf;
+```
+
+or
+
+```C++
+        auto view = data.concentration;
+```
+
+or
+
+```C++
+        auto view = data.particles;
+```
+
+Each "view" provides similar interface:
+* use `getSize()` to get counter of data in a view: 
+  * `for (auto i = 0; i < view.getSize(); ++i)`
+* use `.getValue()` to get particular data from index
+  * `Serial.print(view.getValue(i));`
+* use `.getMetric()` to get unit of measure for particular data; for example "Particles > 1.0 micron [/0.1L]"
+  * `Serial.print(view.getValue(i));`
+* use `.getDiameter()` to get particle diameter corresponding to particular data
+  * `Serial.print(view.getDiameter(i));`
+* additionally: "view" `particles` provides `.getLevel()` - classification of air cleanliness
+  * Serial.print(view.getLevel(i));
+
+Such a "views" (data partitions) are implemented with no execution time increase nor memory overhead.
 
 ```C++
         auto view = data.particles;
         for (auto i = 0; i < view.getSize(); ++i) {
-            Serial.print(view[i]);
+            Serial.print(view.getValue(i));
             Serial.print("\t");
             Serial.print(view.getName(i));
 
             Serial.print(" [");
             Serial.print(view.getMetric(i));
             Serial.print("] ");
-            Serial.print(view.getLevel(i));
+
+//            Serial.print(view.getLevel(i));
             Serial.println();
         }
         break;
