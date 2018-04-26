@@ -414,7 +414,7 @@ Such a "views" (data partitions) are implemented with no execution time increase
             Serial.print(" [");
             Serial.print(view.getMetric(i));
             Serial.print("] ");
-
+ 
 //            Serial.print(view.getLevel(i));
             Serial.println();
         }
@@ -434,10 +434,11 @@ Such a "views" (data partitions) are implemented with no execution time increase
 
 
 
-
-
-
-
+---
+---
+# Description below is not updated yet
+---
+---
 
 # API<a name="API"></a>
 
