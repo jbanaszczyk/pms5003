@@ -1,19 +1,9 @@
 #include <pms.h>
 
-////////////////////////////////////////
-
-//
-// Please uncomment #define PMS_DYNAMIC in pmsConfig.h file
-//
-
 PmsAltSerial pmsSerial;
-
-#if defined PMS_DYNAMIC
-Pms* pms_ = nullptr;
-#define pms (*pms_)
-#else
 pmsx::Pms pms(&pmsSerial);
-#endif
+
+////////////////////////////////////////
 
 // * PMS5003 Pin 1 (black) : VCC +5V
 // * PMS5003 Pin 2 (brown) : GND 
@@ -32,14 +22,10 @@ void setup(void) {
     while (!Serial) {}
     Serial.println("PMS5003");
 
-    #if defined PMS_DYNAMIC
-    pms_ = new Pms(&pmsSerial);
-    #else
-    if (! pms.begin()) {
-        Serial.println("Serial communication with PMS sensor failed");
+    if (!pms.begin()) {
+        Serial.println("PMS sensor: communication failed");
         return;
-    }
-    #endif
+    }    
 
     pms.setPinReset(6);
     pms.setPinSleepMode(7);
@@ -72,36 +58,36 @@ void setup(void) {
 void loop(void) {
 
     static auto lastRead = millis();
+
     pmsx::PmsData data;
     auto status = pms.read(data);
 
     switch (status) {
-        case pmsx::PmsStatus::OK: {
-            Serial.println("_________________");
-            const auto newRead = millis();
-            Serial.print("Wait time ");
-            Serial.println(newRead - lastRead);
-            lastRead = newRead;
+    case pmsx::PmsStatus::OK: {
+        Serial.println("_________________");
+        const auto newRead = millis();
+        Serial.print("Wait time ");
+        Serial.println(newRead - lastRead);
+        lastRead = newRead;
 
-            auto view   = data.particles;
-            for (auto i = 0; i < view.SIZE; ++i) {
-                Serial.print(view[i]);
-                Serial.print("\t");
-                Serial.print(view.names[i]);
-                Serial.print("\t");
-                Serial.print(view.diameters[i]);
-                Serial.print(" [");
-                Serial.print(view.metrics[i]);
-                Serial.print("] ");
-                Serial.print(view.getLevel(i));
-                Serial.println();
-            }
-            break;
+        auto view = data.particles;
+        for (auto i = 0; i < view.getSize(); ++i) {
+            Serial.print(view.getValue(i));
+            Serial.print("\t");
+            Serial.print(view.getName(i));
+
+            Serial.print(" [");
+            Serial.print(view.getMetric(i));
+            Serial.print("] ");
+            Serial.print(view.getLevel(i));
+            Serial.println();
         }
-        case pmsx::PmsStatus::NO_DATA:
-            break;
-        default:
-            Serial.print("!!! Pms error: ");
-            Serial.println(status.getErrorMsg());
+        break;
+    }
+    case pmsx::PmsStatus::NO_DATA:
+        break;
+    default:
+        Serial.print("!!! Pms error: ");
+        Serial.println(status.getErrorMsg());
     }
 }
