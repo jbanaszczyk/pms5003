@@ -19,10 +19,9 @@ To use another communication library:
 
 # pmsConfig.h
 
-## min(), max() templates vs. macros
+## #define PMS_DYNAMIC
 
-pms5003 uses `min()` and `max()` as templates from C++ library. 
-
+Described in [initialization-c-style](README.md#initialization-c-style)
 
 ---
 ---
