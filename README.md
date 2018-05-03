@@ -81,7 +81,7 @@ pms5003 library was successfully checked using:
 
 * Current version uses [DrDiettrich' fork of AltSoftSerial Library](https://github.com/DrDiettrich/AltSoftSerial.git). Install it.
   * pms5003 will not compile using original AltSoftSerial lib.
-* pms5003 will not compile using old Arduino IDE.
+* pms5003 will not compile using __old__ Arduino IDE. Please upgrade.
 
 ### Library
 
@@ -103,7 +103,7 @@ Install pms5003 library.
 
 ## Hello. The Basic scenario.<a name="Hello"></a>
 
-Use the code: https://github.com/jbanaszczyk/pms5003/blob/master/examples/Simple01/Simple01.ino
+Use the code: https://github.com/jbanaszczyk/pms5003/blob/master/Examples/p01basic/p01basic.ino
 
 ```C++
 #include <pms.h>
@@ -170,11 +170,13 @@ void loop(void) {
             Serial.print(view.getValue(i));
             Serial.print("\t");
             Serial.print(view.getName(i));
-
             Serial.print(" [");
             Serial.print(view.getMetric(i));
             Serial.print("] ");
-            Serial.print(view.getLevel(i));
+//            Serial.print(" Level: ");
+//            Serial.print(view.getLevel(i));
+            Serial.print(" | diameter: ");
+            Serial.print(view.getDiameter(i));
             Serial.println();
         }
         break;
@@ -186,30 +188,27 @@ void loop(void) {
         Serial.println(status.getErrorMsg());
     }
 }
-// Program size: 10 166 bytes (used 32% of a 32 256 byte maximum)
-// Minimum Memory Usage: 1045 bytes (51% of a 2048 byte maximum)
 ```
 
 And the result is (something like this):
 ```
 PMS5003
 Time of setup(): 2589
+Wait time 910
+0	Particles > 0.3 micron [/0.1L]  Level: 0.00 | diameter: 0.30
+0	Particles > 0.5 micron [/0.1L]  Level: 0.00 | diameter: 0.50
+0	Particles > 1.0 micron [/0.1L]  Level: 0.00 | diameter: 1.00
+0	Particles > 2.5 micron [/0.1L]  Level: 0.00 | diameter: 2.50
+0	Particles > 5.0 micron [/0.1L]  Level: 0.00 | diameter: 5.00
+0	Particles > 10. micron [/0.1L]  Level: 0.00 | diameter: 10.00
 _________________
-Wait time 124
-0	Particles > 0.3 micron [/0.1L] 0.00
-0	Particles > 0.5 micron [/0.1L] 0.00
-0	Particles > 1.0 micron [/0.1L] 0.00
-0	Particles > 2.5 micron [/0.1L] 0.00
-0	Particles > 5.0 micron [/0.1L] 0.00
-0	Particles > 10. micron [/0.1L] 0.00
-_________________
-Wait time 911
-10647	Particles > 0.3 micron [/0.1L] 9.02
-3306	Particles > 0.5 micron [/0.1L] 8.97
-3036	Particles > 1.0 micron [/0.1L] 9.56
-0	Particles > 2.5 micron [/0.1L] 0.00
-0	Particles > 5.0 micron [/0.1L] 0.00
-0	Particles > 10. micron [/0.1L] 0.00
+Wait time 910
+0	Particles > 0.3 micron [/0.1L]  Level: 0.00 | diameter: 0.30
+0	Particles > 0.5 micron [/0.1L]  Level: 0.00 | diameter: 0.50
+0	Particles > 1.0 micron [/0.1L]  Level: 0.00 | diameter: 1.00
+0	Particles > 2.5 micron [/0.1L]  Level: 0.00 | diameter: 2.50
+0	Particles > 5.0 micron [/0.1L]  Level: 0.00 | diameter: 5.00
+0	Particles > 10. micron [/0.1L]  Level: 0.00 | diameter: 10.00
 ```
 
 ## More about the example
@@ -350,7 +349,7 @@ In case of error: show the error message:
     }
 ```
 
-Go back to the situation where there is something interesting:
+Lets go back to the situation where there is something interesting:
 
 ```C++
     case pmsx::PmsStatus::OK: {
@@ -363,7 +362,7 @@ Data received form PMS5003 (see [Appendix I](https://github.com/jbanaszczyk/pms5
 * in groups:
   * (3 numbers) PM 1.0/2.5/10.0 concentration unit µ g/m3 (CF=1,standard particle) (_really? I have no idea what does it mean_)
   * (3 numbers) PM 1.0/2.5/10.0 concentration unit µ g/m3 (under atmospheric environment) (_looks good_)
-  * (6 numbers) the number of particles with diameter beyond 0.3/0.5/1.0/2.5/5.0/10.0 um in 0.1 L of air (_very tasty data, it fit into ISO 14644-1 classification of air cleanliness levels_)
+  * (6 numbers) the number of particles with diameter beyond 0.3/0.5/1.0/2.5/5.0/10.0 um in 0.1 L of air (_very tasty data, it fits into ISO 14644-1 classification of air cleanliness levels_)
   * (1 number) reserved data, without any real meaning
 
 To get access to them use:
@@ -395,14 +394,16 @@ Each "view" provides similar interface:
   * `for (auto i = 0; i < view.getSize(); ++i)`
 * use `.getValue()` to get particular data from index
   * `Serial.print(view.getValue(i));`
-* use `.getMetric()` to get unit of measure for particular data; for example "Particles > 1.0 micron [/0.1L]"
-  * `Serial.print(view.getValue(i));`
+* use `.getName()` to get description of particular data; for example "Particles > 1.0 micron"
+  * `Serial.print(view.getName(i));`
+* use `.getMetric()` to get unit of measure for particular data; for example "/0.1L"
+  * `Serial.print(view.getMetric(i));`
 * use `.getDiameter()` to get particle diameter corresponding to particular data
   * `Serial.print(view.getDiameter(i));`
-* additionally: "view" `particles` provides `.getLevel()` - classification of air cleanliness
+* additionally: `particles` "view" provides `.getLevel()` - ISO classification of air cleanliness
   * Serial.print(view.getLevel(i));
 
-Such a "views" (data partitions) are implemented with no execution time increase nor memory overhead.
+Such a "views" (data partitions) are implemented with no execution time nor memory overhead.
 
 ```C++
         auto view = data.particles;
@@ -410,12 +411,13 @@ Such a "views" (data partitions) are implemented with no execution time increase
             Serial.print(view.getValue(i));
             Serial.print("\t");
             Serial.print(view.getName(i));
-
             Serial.print(" [");
             Serial.print(view.getMetric(i));
             Serial.print("] ");
- 
+//            Serial.print(" Level: ");
 //            Serial.print(view.getLevel(i));
+            Serial.print(" | diameter: ");
+            Serial.print(view.getDiameter(i));
             Serial.println();
         }
         break;
@@ -425,6 +427,39 @@ Such a "views" (data partitions) are implemented with no execution time increase
 
 #### views - C style
 
+If you prefer C style: constants and arrays instead of method calls - please note https://github.com/jbanaszczyk/pms5003/blob/master/Examples/p02cStyle/p02cStyle.ino
+
+```C++
+        auto view = data.particles;
+        for (auto i = 0; i < view.SIZE; ++i) {
+            Serial.print(view[i]);
+            Serial.print("\t");
+            Serial.print(view.names[i]);
+            Serial.print(" [");
+            Serial.print(view.metrics[i]);
+            Serial.print("] ");
+//            Serial.print(" Level: ");
+//            Serial.print(view.getLevel(i));
+            Serial.print(" | diameter: ");
+            Serial.print(view.diameters[i]);
+            Serial.println();
+        }
+```
+
+* use `SIZE` to get counter of data in a view: 
+  * `for (auto i = 0; i < view.SIZE; ++i)`
+* use array index `[]` to get particular data
+  * `Serial.print(view[i]);`
+* use `.names[]` array to get description of particular data; for example "Particles > 1.0 micron"
+  * `Serial.print(view.names[i]);`
+* use `.metrics[]` array to get unit of measure for particular data; for example "/0.1L"
+  * `Serial.print(view.metrics[i]);`
+* use `.diameters[]` to get particle diameter corresponding to particular data
+  * `Serial.print(view.diameters[i]);`
+* additionally: `particles` "view" provides `.getLevel()` - ISO classification of air cleanliness. It is not implemented as array - it is a function (a method)
+  * Serial.print(view.getLevel(i));
+
+**Which one is better?** It doesn't matter - code size, memory usage and resulting code is exactly the same using both approaches.
 
 
 

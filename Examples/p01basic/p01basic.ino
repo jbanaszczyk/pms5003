@@ -75,11 +75,13 @@ void loop(void) {
             Serial.print(view.getValue(i));
             Serial.print("\t");
             Serial.print(view.getName(i));
-
             Serial.print(" [");
             Serial.print(view.getMetric(i));
             Serial.print("] ");
+            Serial.print(" Level: ");
             Serial.print(view.getLevel(i));
+            Serial.print(" | diameter: ");
+            Serial.print(view.getDiameter(i));
             Serial.println();
         }
         break;

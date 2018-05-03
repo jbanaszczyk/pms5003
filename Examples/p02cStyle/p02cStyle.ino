@@ -71,15 +71,17 @@ void loop(void) {
         lastRead = newRead;
 
         auto view = data.particles;
-        for (auto i = 0; i < view.getSize(); ++i) {
-            Serial.print(view.getValue(i));
+        for (auto i = 0; i < view.SIZE; ++i) {
+            Serial.print(view[i]);
             Serial.print("\t");
-            Serial.print(view.getName(i));
-
+            Serial.print(view.names[i]);
             Serial.print(" [");
-            Serial.print(view.getMetric(i));
+            Serial.print(view.metrics[i]);
             Serial.print("] ");
+            Serial.print(" Level: ");
             Serial.print(view.getLevel(i));
+            Serial.print(" | diameter: ");
+            Serial.print(view.diameters[i]);
             Serial.println();
         }
         break;
