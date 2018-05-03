@@ -20,7 +20,6 @@
 
 // Some C++11 stuff
 
-// ReSharper disable CppInconsistentNaming
 #if defined NOMINMAX
 
 #if defined min
@@ -57,11 +56,9 @@ char (* __countof_helper(_CountofType (&_Array)[_SizeOfArray]))[_SizeOfArray];
 #endif
 
 #if ! defined __INT24_MAX__
-// ReSharper disable once CppInconsistentNaming
+
 using __uint24 = uint32_t;
 #endif
-
-// ReSharper restore CppInconsistentNaming
 
 ////////////////////////////////////////
 
@@ -403,6 +400,10 @@ namespace pmsx {
             if (pmsSerial) {
                 pmsSerial->end();
             }
+        }
+
+        bool initialized() {
+            return pmsSerial;
         }
 
         ////////////////////////////////////////

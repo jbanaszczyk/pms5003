@@ -9,8 +9,7 @@
 PmsAltSerial pmsSerial;
 
 #if defined PMS_DYNAMIC
-Pms* pms_ = nullptr;
-#define pms (*pms_)
+pmsx::Pms* pms = nullptr;
 #else
 pmsx::Pms pms(&pmsSerial);
 #endif
@@ -26,39 +25,39 @@ pmsx::Pms pms(&pmsSerial);
 
 ////////////////////////////////////////
 
-// ReSharper disable once CppInconsistentNaming
 void setup(void) {
     Serial.begin(115200);
     while (!Serial) {}
     Serial.println("PMS5003");
 
 #if defined PMS_DYNAMIC
-    pms_ = new Pms(&pmsSerial);
+    pms = new pmsx::Pms(&pmsSerial);
+    if (!pms->initialized()) {
 #else
-    if (!pms.begin()) {
+    if (!pms->begin()) {
+#endif
         Serial.println("Serial communication with PMS sensor failed");
         return;
     }
-#endif
 
-    pms.setPinReset(6);
-    pms.setPinSleepMode(7);
+    pms->setPinReset(6);
+    pms->setPinSleepMode(7);
 
-    if (!pms.write(pmsx::PmsCmd::CMD_RESET)) {
-        pms.write(pmsx::PmsCmd::CMD_SLEEP);
-        pms.write(pmsx::PmsCmd::CMD_WAKEUP);
+    if (!pms->write(pmsx::PmsCmd::CMD_RESET)) {
+        pms->write(pmsx::PmsCmd::CMD_SLEEP);
+        pms->write(pmsx::PmsCmd::CMD_WAKEUP);
     }
-    pms.write(pmsx::PmsCmd::CMD_MODE_PASSIVE);
-    pms.write(pmsx::PmsCmd::CMD_READ_DATA);
-    pms.waitForData(pmsx::Pms::TIMEOUT_PASSIVE, pmsx::PmsData::FRAME_SIZE);
+    pms->write(pmsx::PmsCmd::CMD_MODE_PASSIVE);
+    pms->write(pmsx::PmsCmd::CMD_READ_DATA);
+    pms->waitForData(pmsx::Pms::TIMEOUT_PASSIVE, pmsx::PmsData::FRAME_SIZE);
     pmsx::PmsData data;
-    auto status = pms.read(data);
+    auto status = pms->read(data);
     if (status != pmsx::PmsStatus::OK) {
         Serial.print("PMS sensor: ");
         Serial.println(status.getErrorMsg());
     }
-    pms.write(pmsx::PmsCmd::CMD_MODE_ACTIVE);
-    if (!pms.isWorking()) {
+    pms->write(pmsx::PmsCmd::CMD_MODE_ACTIVE);
+    if (!pms->isWorking()) {
         Serial.println("PMS sensor failed");
     }
 
@@ -68,12 +67,11 @@ void setup(void) {
 
 ////////////////////////////////////////
 
-// ReSharper disable once CppInconsistentNaming
 void loop(void) {
 
     static auto lastRead = millis();
     pmsx::PmsData data;
-    auto status = pms.read(data);
+    auto status = pms->read(data);
 
     switch (status) {
     case pmsx::PmsStatus::OK: {

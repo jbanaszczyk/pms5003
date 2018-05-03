@@ -495,6 +495,63 @@ Our serial connection started in step 3) is destroyed during Arduino initializat
 
 There are at least two possible solutions:
 
+##### initialization: begin()
+
+If you are not sure, if everything was properly initialized - execute `begin()` manually and check the result.
+
+
 ##### C/Arduino way
+
+* [Examples\p01basic\p01basic.ino](https://github.com/jbanaszczyk/pms5003/blob/master/Examples/p01basic/p01basic.ino)
+* Create static variable of type `Pms`, do nothing in constructor
+* Initialize it during `setup()`: call `pms.begin()`
+* Use it: call `pms.` methods
+
+```C++
+PmsAltSerial pmsSerial;
+pmsx::Pms pms(&pmsSerial);
+
+void setup(void) {
+    if (!pms.begin()) {
+```
+
+##### C++ way
+
+* Edit pmsConfig.h file, uncomment line `#define PMS_DYNAMIC`
+* [Examples\p03cppStyle\p03cppStyle.ino](https://github.com/jbanaszczyk/pms5003/blob/master/Examples/p03cppStyle/p03cppStyle.ino)
+* Create static variable of type `*Pms` (reference to `Pms`)
+* During `setup()` create new object of type `Pms`, assign created object to the reference from previous step
+  * `Pms()` constructor is executed automatically
+  * `Pms()` constructor executes `begin()`
+  * It executes `begin()` of serial port driver
+* Use it: call `pms->` methods
+
+This approach adds some code size - compiler adds dynamic memory management.
+
+```C++
+PmsAltSerial pmsSerial;
+pmsx::Pms* pms = nullptr;
+
+void setup(void) {
+    pms = new pmsx::Pms(&pmsSerial);
+    if (!pms->initialized()) {
+```
+
+# Notes
+
+## API
+
+[pms5003 API description](API.md) is available as a separate document.
+
+## Operations on serial port
+
+Serial interface **is not managed** by `Pms`. You can stop it down, enter sleep mode, even replace serial port. Just remember to execute `pms.begin()` to reinitialize connection.
+
+## namespace pmsx{}
+
+`pms5003` library is designed to avoid namespace pollution. All classes are located in namespace `pmsx`. All examples use the fully qualified names like **pmsx::**`Pms pms(&pmsSerial);`
+
+
+
 
 

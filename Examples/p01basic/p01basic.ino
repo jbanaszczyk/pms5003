@@ -16,7 +16,6 @@ pmsx::Pms pms(&pmsSerial);
 
 ////////////////////////////////////////
 
-// ReSharper disable once CppInconsistentNaming
 void setup(void) {
     Serial.begin(115200);
     while (!Serial) {}
@@ -54,7 +53,6 @@ void setup(void) {
 
 ////////////////////////////////////////
 
-// ReSharper disable once CppInconsistentNaming
 void loop(void) {
 
     static auto lastRead = millis();
