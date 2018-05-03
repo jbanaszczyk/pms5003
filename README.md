@@ -107,7 +107,7 @@ Install pms5003 library.
 
 ## Hello. The Basic scenario.<a name="Hello"></a>
 
-Use the code:  [Examples/p01basic/p01basic.ino](https://github.com/jbanaszczyk/pms5003/Examples/p01basic/p01basic.ino)
+Use the code:  [Examples\p01basic\p01basic.ino](https://github.com/jbanaszczyk/pms5003/blob/master/Examples/p01basic/p01basic.ino)
 
 ```C++
 #include <pms.h>
@@ -361,7 +361,7 @@ Lets go back to the situation where there is something interesting:
 
 #### views
 
-Data received from PMS5003 (see [Appendix I](blob/master/doc/pms5003-manual_v2-3.pdf)) may be worth attention:
+Data received from PMS5003 (see [Appendix I](https://github.com/jbanaszczyk/pms5003/blob/master/doc/pms5003-manual_v2-3.pdf)) may be worth attention:
 * as a whole (12 numbers)
 * in groups:
   * (3 numbers) PM 1.0/2.5/10.0 concentration unit µ g/m3 (CF=1,standard particle) (_really? I have no idea what does it mean_)
@@ -431,7 +431,7 @@ Such a "views" (data partitions) are implemented with no execution time nor memo
 
 #### views: C style
 
-If you prefer C style: constants and arrays instead of method calls - please note [Examples/p02cStyle/p02cStyle.ino](blob/master/Examples/p02cStyle/p02cStyle.ino)
+If you prefer C style: constants and arrays instead of method calls - please note [Examples\p02cStyle\p02cStyle.ino](https://github.com/jbanaszczyk/pms5003/blob/master/Examples/p02cStyle/p02cStyle.ino)
 
 ```C++
         auto view = data.particles;
