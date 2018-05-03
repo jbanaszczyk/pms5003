@@ -28,7 +28,7 @@ Release 2.0 brings a lot of changes and improvements:
 
 ### Good, stable revision: 1.00
 
-Previous [release: 1.0](/releases/tag/1.0) is still available.
+Previous [release: 1.0](releases/tag/1.0) is still available.
 
 There is one interesting fork supporting ESP8266: https://github.com/riverscn/pmsx003
 
