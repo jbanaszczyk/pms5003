@@ -7,8 +7,11 @@
 
 #define PMS_ALTSOFTSERIAL
 
-#if not defined(PMS_ALTSOFTSERIAL)
-#error "At one of: PMS_ALTSOFTSERIAL have to be defined in pmsConfig.h"
+#if defined PMS_ALTSOFTSERIAL
+// Install https://github.com/DrDiettrich/AltSoftSerial.git)
+#include <pmsSerialAltSoftSerial.h>
+#else
+#error "At least one of: [ PMS_ALTSOFTSERIAL ] have to be defined in pmsConfig.h"
 #endif
 
 ////////////////////////////////////////////
@@ -27,16 +30,8 @@
 
 ////////////////////////////////////////////
 
-// Undefine to use modern min() template function instead of min() macro. I hate unnecessary macros.
-// Works with Visual Studio, compiler errors with Arduino IDE.
+// Intentionally undocumented. Undefine to use min()/max() template functions instead of min()/max() macro. I hate unnecessary macros.
 
-#define NOMINMAX
-
-////////////////////////////////////////////
-
-#if defined PMS_ALTSOFTSERIAL
-// Install https://github.com/DrDiettrich/AltSoftSerial.git)
-#include <pmsSerialAltSoftSerial.h>
-#endif
+// #define NOMINMAX
 
 ////////////////////////////////////////////

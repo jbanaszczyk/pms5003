@@ -1,4 +1,29 @@
 
+# #include <pms.h>
+
+To use pms5003 library just install the library and `#include <pms.h>`
+
+Nothing more. All described files are included automatically.
+
+# Serial driver
+
+To use another communication library:
+
+* Implement interface `IPmsSerial` defined in the pmsSerial.h 
+* It defines kind of proxy between available serial communications libraries and pms5003 operations
+  * My implementation for clone of AltSoftSerial is located in pmsSerialAltSoftSerial.h
+* Modify pmsConfig.h
+  * somewhere near `PMS_ALTSOFTSERIAL` occurrences
+* Create object `yourDriver` of your implementation.
+  * Use that object in constructor `Pms(&yourDriver)` or `.addSerial(&yourDriver)`
+
+# pmsConfig.h
+
+## min(), max() templates vs. macros
+
+pms5003 uses `min()` and `max()` as templates from C++ library. 
+
+
 ---
 ---
 # Description below is not updated yet since version 1.0

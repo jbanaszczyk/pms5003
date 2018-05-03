@@ -24,29 +24,32 @@
 
 #if defined min
 #undef min
+#define min _min11
 #endif
-
-template <class T>
-inline const T& __attribute__((always_inline))min(const T& a, const T& b);
-
-template <class T>
-inline const T& __attribute__((always_inline))min(const T& a, const T& b) {
-    return !(b < a) ? a : b;
-}
 
 #if defined max
 #undef max
+#define max _max11
 #endif
 
-template <class T>
-inline const T& __attribute__((always_inline))max(const T& a, const T& b);
+#endif
+
 
 template <class T>
-inline const T& __attribute__((always_inline))max(const T& a, const T& b) {
-    return !(b > a) ? a : b;
+inline const T& __attribute__((always_inline))_min11(const T& a, const T& b);
+
+template <class T>
+inline const T& __attribute__((always_inline))_min11(const T& a, const T& b) {
+    return !(b < a) ? a : b;
 }
 
-#endif
+template <class T>
+inline const T& __attribute__((always_inline))_max11(const T& a, const T& b);
+
+template <class T>
+inline const T& __attribute__((always_inline))_max11(const T& a, const T& b) {
+    return !(b > a) ? a : b;
+}
 
 #ifndef _countof
 template <typename _CountofType, size_t _SizeOfArray>
@@ -58,6 +61,7 @@ char (* __countof_helper(_CountofType (&_Array)[_SizeOfArray]))[_SizeOfArray];
 #if ! defined __INT24_MAX__
 
 using __uint24 = uint32_t;
+
 #endif
 
 ////////////////////////////////////////
@@ -94,7 +98,7 @@ namespace pmsx {
                 "Serial port not initialized",
                 "Status:unknown"
             };
-            return errorMsg[min(value, static_cast<decltype(value)> _countof(errorMsg))];
+            return errorMsg[_min11(value, static_cast<decltype(value)> _countof(errorMsg))];
         }
     };
 
@@ -131,7 +135,7 @@ namespace pmsx {
                     "Particles > 10. micron",
                     "Reserved_0"
                 };
-                return NAMES[min(static_cast<decltype(Ofset + index)>(Ofset + index), static_cast<decltype(Ofset + index)>(_countof(NAMES)))];
+                return NAMES[_min11(static_cast<decltype(Ofset + index)>(Ofset + index), static_cast<decltype(Ofset + index)>(_countof(NAMES)))];
             }
         };
 
@@ -157,7 +161,7 @@ namespace pmsx {
 
                     "???"
                 };
-                return METRICS[min(static_cast<decltype(Ofset + index)>(Ofset + index), static_cast<decltype(Ofset + index)>(_countof(METRICS)))];
+                return METRICS[_min11(static_cast<decltype(Ofset + index)>(Ofset + index), static_cast<decltype(Ofset + index)>(_countof(METRICS)))];
             }
         };
 
@@ -183,7 +187,7 @@ namespace pmsx {
 
                     0.0f
                 };
-                return DIAMETERS[min(static_cast<decltype(Ofset + index)>(Ofset + index), static_cast<decltype(Ofset + index)>(_countof(DIAMETERS)))];
+                return DIAMETERS[_min11(static_cast<decltype(Ofset + index)>(Ofset + index), static_cast<decltype(Ofset + index)>(_countof(DIAMETERS)))];
             }
         };
 
