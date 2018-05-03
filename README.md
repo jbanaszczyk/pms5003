@@ -523,7 +523,7 @@ void setup(void) {
 * During `setup()` create new object of type `Pms`, assign created object to the reference from previous step
   * `Pms()` constructor is executed automatically
   * `Pms()` constructor executes `begin()`
-  * It executes `begin()` of serial port driver
+  * It executes `begin()` of the serial port driver
 * Use it: call `pms->` methods
 
 This approach adds some code size - compiler adds dynamic memory management.

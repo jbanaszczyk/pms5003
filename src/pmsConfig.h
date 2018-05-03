@@ -23,7 +23,7 @@
 //   pro: It can be created within setup(), it is good time to initialize class instance in the constructor. Arduino board was initialized here.
 //   con: If you are not using heap: it uses heap, it adds meaningful code overhead - malloc, new() and memory management should be included. ( 0.5kb of program memory, a few memory bytes)
 
-#define PMS_DYNAMIC
+// #define PMS_DYNAMIC
 
 ////////////////////////////////////////////
 

@@ -1,10 +1,12 @@
+
+// Please uncomment #define PMS_DYNAMIC in pmsConfig.h file
+// or use #define PMS_DYNAMIC before #include <pms.h>
+
+#define PMS_DYNAMIC
+
 #include <pms.h>
 
 ////////////////////////////////////////
-
-//
-// Please uncomment #define PMS_DYNAMIC in pmsConfig.h file
-//
 
 PmsAltSerial pmsSerial;
 
