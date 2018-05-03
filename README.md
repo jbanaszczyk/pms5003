@@ -28,7 +28,7 @@ Release 2.0 brings a lot of changes and improvements:
 
 ### Good, stable revision: 1.00
 
-Previous releases are available: https://github.com/jbanaszczyk/pms5003/releases
+Previous [release: 1.0](/releases/tag/1.0) is still available.
 
 There is one interesting fork supporting ESP8266: https://github.com/riverscn/pmsx003
 
@@ -50,6 +50,10 @@ If you are interested in support of your sensor: feel free to ask.
 * __The main goal__: Reading data from the sensor does not block. Your process receives the status `OK` or `NO_DATA` or some kinds of errors but your process never waits for the data.
 * Provides support for ISO 14644-1 classification of air cleanliness levels.
 
+## API
+
+[pms5003 API description](API.md) is available as a separate document.
+
 ## TODO
 
 * New methods: some more checks
@@ -62,7 +66,7 @@ If you are interested in support of your sensor: feel free to ask.
     * CLion
     * ...
 * Support for boards:
-  * ESP8266 support
+  * ESP8266
 * Add unit tests
   * There are no unit tests yet :(
 
@@ -72,7 +76,7 @@ If you are interested in support of your sensor: feel free to ask.
 
 pms5003 library is developed using:
 * Visual Studio Community 2017 (Windows)
-* Arduino IDE for Visual Studio: http://www.visualmicro.com/
+* [Arduino IDE for Visual Studio](http://www.visualmicro.com)
 
 pms5003 library was successfully checked using:
 * Arduino 1.8.5 (Windows)
@@ -99,15 +103,11 @@ Install pms5003 library.
   * PMS5003 Pin 3 (white): Arduino pin 7 (can be changed or not connected at all)
   * PMS5003 Pin 6 (violet): Arduino pin 6 (can be changed or not connected at all)
 
-# API
-
-[pms5003 API description](API.md) is available as a separate document.
-
 # Applications
 
 ## Hello. The Basic scenario.<a name="Hello"></a>
 
-Use the code: https://github.com/jbanaszczyk/pms5003/blob/master/Examples/p01basic/p01basic.ino
+Use the code:  [Examples/p01basic/p01basic.ino](blob/master/Examples/p01basic/p01basic.ino)
 
 ```C++
 #include <pms.h>
@@ -361,7 +361,7 @@ Lets go back to the situation where there is something interesting:
 
 #### views
 
-Data received from PMS5003 (see [Appendix I](https://github.com/jbanaszczyk/pms5003/blob/master/doc/pms5003-manual_v2-3.pdf)) may be worth attention:
+Data received from PMS5003 (see [Appendix I](blob/master/doc/pms5003-manual_v2-3.pdf)) may be worth attention:
 * as a whole (12 numbers)
 * in groups:
   * (3 numbers) PM 1.0/2.5/10.0 concentration unit µ g/m3 (CF=1,standard particle) (_really? I have no idea what does it mean_)
@@ -429,9 +429,9 @@ Such a "views" (data partitions) are implemented with no execution time nor memo
 }
 ```
 
-#### views - C style
+#### views: C style
 
-If you prefer C style: constants and arrays instead of method calls - please note https://github.com/jbanaszczyk/pms5003/blob/master/Examples/p02cStyle/p02cStyle.ino
+If you prefer C style: constants and arrays instead of method calls - please note [Examples/p02cStyle/p02cStyle.ino](blob/master/Examples/p02cStyle/p02cStyle.ino)
 
 ```C++
         auto view = data.particles;
@@ -465,11 +465,36 @@ If you prefer C style: constants and arrays instead of method calls - please not
 
 **Which one is better?** It doesn't matter - code size, memory usage and resulting code is exactly the same using both approaches.
 
+#### Initialization: C++ style
 
+Common pattern in C++ is "initialization in constructor". Unfortunately Arduino breaks that rule.
 
+Code from: hardware\arduino\avr\cores\arduino\main.cpp (modified for simplicity)
 
+```C
+// global variables constructors are executed before main()
+int main(void) {
+        init();
+        initVariant();
+        setup();         // our setup() procedure
+        for (;;) {
+                loop();  // our loop()  procedure
+        }
+        return 0;
+}
+```
 
+Lets imagine:
+1. If there would be is a global variable `pms` of type `Pms`.
+2. It would be a good place to initialize serial communication `pms.begin()` within `pms` constructor
+3. Global variables constructors are executed before main()
+4. After that Arduino initializes all the hardware
+5. And than our `setup()` is executed.
 
+Our serial connection started in step 3) is destroyed during Arduino initialization in step 4.
 
+There are at least two possible solutions:
+
+##### C/Arduino way
 
 

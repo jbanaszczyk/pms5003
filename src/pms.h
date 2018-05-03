@@ -1,10 +1,10 @@
 #pragma once
 
 #include <Arduino.h>
+#include <stdint.h>
 #include <tribool.h>
 #include <pmsConfig.h>
 #include <pmsSerial.h>
-
 
 // Important: Use 3.3V logic
 // Pin 1: Vcc

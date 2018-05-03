@@ -1,7 +1,7 @@
 
 ---
 ---
-# Description below is not updated yet
+# Description below is not updated yet since version 1.0
 ---
 ---
 
