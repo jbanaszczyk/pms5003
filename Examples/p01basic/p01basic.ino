@@ -6,7 +6,7 @@ pmsx::Pms pms(&pmsSerial);
 ////////////////////////////////////////
 
 // * PMS5003 Pin 1 (black) : VCC +5V
-// * PMS5003 Pin 2 (brown) : GND 
+// * PMS5003 Pin 2 (brown) : GND
 // Important: pms5003 uses 3.3V logic.Use converters if required or make sure your Arduino board uses 3.3V logic too.
 // * PMS5003 Pin 4 (blue) : Digital pin 9 (there is no choice, forced by AltSerial)
 // * PMS5003 Pin 5 (green) : Digital pin 8 (there is no choice, forced by AltSerial)
@@ -25,7 +25,7 @@ void setup(void) {
     if (!pms.begin()) {
         Serial.println("PMS sensor: communication failed");
         return;
-    }    
+    }
 
     pms.setPinReset(6);
     pms.setPinSleepMode(7);

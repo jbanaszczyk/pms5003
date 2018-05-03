@@ -1,5 +1,4 @@
-#ifndef _tribool_h_
-#define _tribool_h_
+#pragma once
 
 #include <Arduino.h>
 
@@ -85,5 +84,3 @@ constexpr inline tribool operator!=(unknown_keyword_t, tribool lhs) { return tri
 constexpr inline tribool operator!=(tribool lhs, unknown_keyword_t) { return lhs != tribool(unknown); }
 
 constexpr inline bool unknown(tribool arg, unknown_t dummy) { return false; };
-
-#endif

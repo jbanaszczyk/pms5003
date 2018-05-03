@@ -9,7 +9,7 @@ public:
 	void setTimeout(const unsigned long timeout) override {
 		serial.setTimeout(timeout);
 	}
-		
+
 	size_t available() override {
 		return serial.available();
 	}

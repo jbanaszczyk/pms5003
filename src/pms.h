@@ -11,7 +11,7 @@
 // Pin 2: GND
 
 // Using AltSoftSerial:
-//   Pin 4: Digital pin 9 (there is no choice) 
+//   Pin 4: Digital pin 9 (there is no choice)
 //   Pin 5: Digital pin 8 (there is no choice)
 //   in file pmsConfig.h: Enable #define PMS_ALTSOFTSERIAL
 //   Install DrDiettrich' fork of AltSoftSerial Library: https://github.com/DrDiettrich/AltSoftSerial.git
@@ -436,7 +436,7 @@ namespace pmsx {
             *sum += (data & 0xFF) + (data >> 8);
         }
 
-        //////////////////////////////////////// 
+        ////////////////////////////////////////
 
     public:
         void setTimeout(decltype(timeout) timeout) {

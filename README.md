@@ -121,7 +121,7 @@ void setup(void) {
     if (!pms.begin()) {
         Serial.println("PMS sensor: communication failed");
         return;
-    }    
+    }
 
     pms.setPinReset(6);
     pms.setPinSleepMode(7);
@@ -257,7 +257,7 @@ The next step is to define Arduino pins connected to pms5003:
 * SET (pms5003 pin 3, white) (sleep/wakeup)
 * RESET (pms5003 pin 6, violet) (sensor reset)
 
-This step is optional. 
+This step is optional.
 * If SET pin is not connected - sleep/wakeup commands are executed using serial connection
 * If RESET pin is not connected - sleep and then wakeup works like reset
 
@@ -268,7 +268,7 @@ If pins are not connected - just remove appropriate `setPinReset`/`setPinSleepMo
     pms.setPinSleepMode(7);
 ```
 
-The next task is to put sensor in a well known state. 
+The next task is to put sensor in a well known state.
 There are two aspects of PMS5003 state:
 * sleep/waken up
 * passive/active
@@ -287,9 +287,9 @@ Well known state (woken up and active) can be achieved after sensor reset or sle
 ```
 
 The next task is to make sure, that Arduino can communicate with PMS5003. To accomplish the task we are:
-* forcing passive mode (PMS5003 sends data if asked), 
-* ask for data, 
-* wait for the response 
+* forcing passive mode (PMS5003 sends data if asked),
+* ask for data,
+* wait for the response
 * and check the response
 
 ```C++
@@ -315,7 +315,7 @@ Finally we put PMS5003 in active mode - it sends data periodically and automatic
 
 ### loop()
 
-First of all: __pms5003 does not block on data read__ 
+First of all: __pms5003 does not block on data read__
 
 Try to read the data :
 
@@ -357,8 +357,8 @@ Lets go back to the situation where there is something interesting:
 
 #### views
 
-Data received form PMS5003 (see [Appendix I](https://github.com/jbanaszczyk/pms5003/blob/master/doc/pms5003-manual_v2-3.pdf)) may be worth attention:
-* as a whole (13 numbers)
+Data received from PMS5003 (see [Appendix I](https://github.com/jbanaszczyk/pms5003/blob/master/doc/pms5003-manual_v2-3.pdf)) may be worth attention:
+* as a whole (12 numbers)
 * in groups:
   * (3 numbers) PM 1.0/2.5/10.0 concentration unit µ g/m3 (CF=1,standard particle) (_really? I have no idea what does it mean_)
   * (3 numbers) PM 1.0/2.5/10.0 concentration unit µ g/m3 (under atmospheric environment) (_looks good_)
@@ -390,7 +390,7 @@ or
 ```
 
 Each "view" provides similar interface:
-* use `getSize()` to get counter of data in a view: 
+* use `getSize()` to get counter of data in a view:
   * `for (auto i = 0; i < view.getSize(); ++i)`
 * use `.getValue()` to get particular data from index
   * `Serial.print(view.getValue(i));`
@@ -446,7 +446,7 @@ If you prefer C style: constants and arrays instead of method calls - please not
         }
 ```
 
-* use `SIZE` to get counter of data in a view: 
+* use `SIZE` to get counter of data in a view:
   * `for (auto i = 0; i < view.SIZE; ++i)`
 * use array index `[]` to get particular data
   * `Serial.print(view[i]);`
@@ -776,7 +776,7 @@ _Shown in_: [Basic scenario](#Hello)
 private: static const auto TIMEOUT_ACK = 30U;
 ```
 
-Used internally (inside write()). Defines timeout for response read after write command. 
+Used internally (inside write()). Defines timeout for response read after write command.
 
 write() can block up to TIMEOUT_ACK.
 
@@ -786,13 +786,13 @@ write() can block up to TIMEOUT_ACK.
 static const auto WAKEUP_TIME = 2500U;
 ```
 
-WAKEUP_TIME defines time after power on, reset or write(CMD_WAKEUP) when the sensor is blind for any commands. 
+WAKEUP_TIME defines time after power on, reset or write(CMD_WAKEUP) when the sensor is blind for any commands.
 
 _Shown in_: [Basic scenario](#Hello)
 
 ## Commands and states<a name="commands"></a>
 
-PMS5003 accepts a few commands. They are not fully documented. 
+PMS5003 accepts a few commands. They are not fully documented.
 
 You can send commands to the PMS5003 sensor using [write()](#API_write).
 
@@ -809,5 +809,4 @@ You can send commands to the PMS5003 sensor using [write()](#API_write).
 
 
 # Configuration <a name="Cfg_PMS_DYNAMIC"></a>
-
 
