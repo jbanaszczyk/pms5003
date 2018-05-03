@@ -28,7 +28,7 @@ Release 2.0 brings a lot of changes and improvements:
 
 ### Good, stable revision: 1.00
 
-Previous [release: 1.0](releases/tag/1.0) is still available.
+Previous [release: 1.0](https://github.com/jbanaszczyk/pms5003/releases/tag/1.0) is still available.
 
 There is one interesting fork supporting ESP8266: https://github.com/riverscn/pmsx003
 
@@ -107,7 +107,7 @@ Install pms5003 library.
 
 ## Hello. The Basic scenario.<a name="Hello"></a>
 
-Use the code:  [Examples/p01basic/p01basic.ino](blob/master/Examples/p01basic/p01basic.ino)
+Use the code:  [Examples/p01basic/p01basic.ino]https://github.com/jbanaszczyk/pms5003/Examples/p01basic/p01basic.ino)
 
 ```C++
 #include <pms.h>
