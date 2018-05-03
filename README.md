@@ -539,7 +539,7 @@ void setup(void) {
 
 # Final notes
 
-## API
+## [API]
 
 [pms5003 API description](API.md) is available as a separate document.
 

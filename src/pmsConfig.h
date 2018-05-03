@@ -30,7 +30,8 @@
 
 ////////////////////////////////////////////
 
-// Intentionally undocumented. Undefine to use min()/max() template functions instead of min()/max() macro. I hate unnecessary macros.
+// Intentionally undocumented.
+// Undefine to use min()/max() template functions instead of min()/max() macro. I hate unnecessary macros.
 
 // #define NOMINMAX
 
