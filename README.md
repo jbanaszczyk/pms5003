@@ -107,7 +107,7 @@ Install pms5003 library.
 
 ## Hello. The Basic scenario.<a name="Hello"></a>
 
-Use the code:  [Examples/p01basic/p01basic.ino]https://github.com/jbanaszczyk/pms5003/Examples/p01basic/p01basic.ino)
+Use the code:  [Examples/p01basic/p01basic.ino](https://github.com/jbanaszczyk/pms5003/Examples/p01basic/p01basic.ino)
 
 ```C++
 #include <pms.h>
