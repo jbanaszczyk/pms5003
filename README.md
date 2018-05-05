@@ -59,6 +59,7 @@ If you are interested in support of your sensor: feel free to ask.
 * New methods: some more checks
   * checkResetPin - check if declared reset pin works fine (check if it resets the sensor)
   * checkSleepPin - check if declared sleep/wake up pin is properly connected
+* Refactor isWorking() to tribool
 * Use PROGMEM to store some static data (mostly strings)
 * Support for platforms
   * More platforms:

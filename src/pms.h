@@ -20,37 +20,6 @@
 
 // Some C++11 stuff
 
-#if defined NOMINMAX
-
-#if defined min
-#undef min
-#define min _min11
-#endif
-
-#if defined max
-#undef max
-#define max _max11
-#endif
-
-#endif
-
-
-template <class T>
-inline const T& __attribute__((always_inline))_min11(const T& a, const T& b);
-
-template <class T>
-inline const T& __attribute__((always_inline))_min11(const T& a, const T& b) {
-    return !(b < a) ? a : b;
-}
-
-template <class T>
-inline const T& __attribute__((always_inline))_max11(const T& a, const T& b);
-
-template <class T>
-inline const T& __attribute__((always_inline))_max11(const T& a, const T& b) {
-    return !(b > a) ? a : b;
-}
-
 #ifndef _countof
 template <typename _CountofType, size_t _SizeOfArray>
 char (* __countof_helper(_CountofType (&_Array)[_SizeOfArray]))[_SizeOfArray];
@@ -59,21 +28,21 @@ char (* __countof_helper(_CountofType (&_Array)[_SizeOfArray]))[_SizeOfArray];
 #endif
 
 #if ! defined __INT24_MAX__
-
 using __uint24 = uint32_t;
-
 #endif
 
 ////////////////////////////////////////
 
 namespace pmsx {
 
+    auto constexpr pmsxVersion = 0x0200;
+
     typedef uint16_t pmsData_t;
 
     class PmsStatus {
-    public:
         using pmsStatus_t = uint8_t;
         pmsStatus_t value;
+    public:
         explicit PmsStatus(pmsStatus_t value) : value(value) {}
 
         operator pmsStatus_t() {
@@ -87,7 +56,6 @@ namespace pmsx {
         static constexpr pmsStatus_t SUM_ERROR             = 1 + FRAME_LENGTH_MISMATCH;
         static constexpr pmsStatus_t NO_SERIAL             = 1 + SUM_ERROR;
 
-    public:
         const char* getErrorMsg() {
             static const char* errorMsg[]{
                 "OK",
@@ -98,7 +66,7 @@ namespace pmsx {
                 "Serial port not initialized",
                 "Status:unknown"
             };
-            return errorMsg[_min11(value, static_cast<decltype(value)> _countof(errorMsg))];
+            return errorMsg[min(value,  _countof(errorMsg))];
         }
     };
 
@@ -135,7 +103,7 @@ namespace pmsx {
                     "Particles > 10. micron",
                     "Reserved_0"
                 };
-                return NAMES[_min11(static_cast<decltype(Ofset + index)>(Ofset + index), static_cast<decltype(Ofset + index)>(_countof(NAMES)))];
+                return NAMES[min(Ofset + index, static_cast<decltype(Ofset + index)>(_countof(NAMES)))];
             }
         };
 
@@ -161,7 +129,7 @@ namespace pmsx {
 
                     "???"
                 };
-                return METRICS[_min11(static_cast<decltype(Ofset + index)>(Ofset + index), static_cast<decltype(Ofset + index)>(_countof(METRICS)))];
+                return METRICS[min(Ofset + index, static_cast<decltype(Ofset + index)>(_countof(METRICS)))];
             }
         };
 
@@ -187,7 +155,7 @@ namespace pmsx {
 
                     0.0f
                 };
-                return DIAMETERS[_min11(static_cast<decltype(Ofset + index)>(Ofset + index), static_cast<decltype(Ofset + index)>(_countof(DIAMETERS)))];
+                return DIAMETERS[min(Ofset + index, static_cast<decltype(Ofset + index)>(_countof(DIAMETERS)))];
             }
         };
 
@@ -198,6 +166,9 @@ namespace pmsx {
         public:
 
             static constexpr pmsIdx_t SIZE = Size;
+            static Names_<Ofset> names;
+            static Metrics_<Ofset> metrics;
+            static Diameters_<Ofset> diameters;
 
             static constexpr pmsIdx_t getSize() {
                 return SIZE;
@@ -210,10 +181,6 @@ namespace pmsx {
             pmsData_t getValue(pmsIdx_t index) const {
                 return data[index];
             }
-
-            static Names_<Ofset> names;
-            static Metrics_<Ofset> metrics;
-            static Diameters_<Ofset> diameters;
 
             static const char* getName(pmsIdx_t index) {
                 return names[index];

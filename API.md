@@ -21,13 +21,197 @@ To use another communication library:
 
 ## #define PMS_DYNAMIC
 
-Described in [initialization-c-style](README.md#initialization-c-style)
+Described in [Initialization C++ Style](README.md#initialization-c-style)
+
+## #define NOMINMAX
+
+It is a common meaning of NOMINMAX. It introduces function templates min() and max() instead of macros.
+
+Unfortunately Arduino does not implement C++ Standard Library, there is a lack of `std::common_type`, so my implementation is not complete. Uncomment at your own risk.
+
+# tribool.h
+
+It is a port of [boost.tribool](http://www.boost.org/doc/libs/1_63_0/doc/html/tribool.html) library - tristate logic: yes/no/unknown. It is used as a type of return value of `isModeActive()` and `isModeSleep()`. Sample code:
+```C++
+    if ( pms.isModeActive()) {
+        Serial.println("Active");
+    } else if ( !pms.isModeActive()) {
+        Serial.println("Passive");
+    } else {
+        Serial.println("Unknown");        
+    }
+```
+
+Please note, that the goal of the code within `setup()` is to enter `isModeActive()` and `isModeSleep()` into any known mode (true or false). Than (till `setSerial()`) state of `pms` is always known.
+```C++
+    if (!pms.write(pmsx::PmsCmd::CMD_RESET)) {
+        pms.write(pmsx::PmsCmd::CMD_SLEEP);
+        pms.write(pmsx::PmsCmd::CMD_WAKEUP);
+    }
+```
+
+tribool.h defines both:
+* third state
+* tribool operators: `&&`, `||`, `==`, `!=`
+
+# pms.h
+
+## namespace pmsx
+
+Almost all entities defined by <pms.h> are located in `pmsx` namespace.
+
+Please refer to [namespace pmsx{}](README.md#namespace-pmsx) description how to save typing _pmsx::_
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ---
 ---
 # Description below is not updated yet since version 1.0
 ---
 ---
+
+
+
+
+
+## TODO
+
+```
+    auto constexpr pmsxVersion = 0x0200;
+
+    typedef uint16_t pmsData_t;
+
+    class PmsStatus {
+        explicit PmsStatus(pmsStatus_t value);
+        operator pmsStatus_t();
+        static constexpr pmsStatus_t OK                    
+        static constexpr pmsStatus_t NO_DATA        
+        static constexpr pmsStatus_t READ_ERROR
+        static constexpr pmsStatus_t FRAME_LENGTH_MISMATCH 
+        static constexpr pmsStatus_t SUM_ERROR
+        static constexpr pmsStatus_t NO_SERIAL            
+        const char* getErrorMsg() 
+    };
+
+    class PmsData {
+        typedef uint8_t pmsIdx_t;
+        static constexpr pmsIdx_t DATA_SIZE = 13;
+        static const size_t RESPONSE_FRAME_SIZE = (1 + 3) * sizeof(pmsData_t); // Frame size for single pmsData_t response (after write command)
+        static constexpr size_t FRAME_SIZE      = (DATA_SIZE + 3) * sizeof(pmsData_t); // useful for waitForData()
+        static constexpr size_t getFrameSize() {
+
+    public:
+        template <pmsIdx_t Size, pmsIdx_t Ofset>
+        class PmsConcentrationData {
+            pmsData_t data[Size];
+        public:
+
+            static constexpr pmsIdx_t SIZE = Size;
+
+            static constexpr pmsIdx_t getSize() {
+            pmsData_t& operator[](pmsIdx_t index) {
+            pmsData_t getValue(pmsIdx_t index) const {
+
+
+            static Names_<Ofset> names;
+            static Metrics_<Ofset> metrics;
+            static Diameters_<Ofset> diameters;
+
+            static const char* getName(pmsIdx_t index) {
+                return names[index];
+            }
+
+            static const char* getMetric(pmsIdx_t index) {
+                return metrics[index];
+            }
+
+            static float getDiameter(pmsIdx_t index) {
+                return diameters[index];
+            }
+        };
+
+        class Cleanliness : public PmsConcentrationData<6, 6> {
+        public:
+            // according to ISO 14644-1:2002 http://www.instalacje-sanitarne.waw.pl/poradnik.html
+            float getLevel(pmsIdx_t index) const {
+                return (getValue(index) == 0) ? 0.0 : 4.0 + log10(getValue(index) * pow(getDiameter(index) * 10.0, 2.08));
+            }
+        };
+
+        union {
+            PmsConcentrationData<13, 0> raw;
+
+            struct {
+                PmsConcentrationData<3, 0> concentrationCf;
+                PmsConcentrationData<3, 3> concentration;
+                Cleanliness particles;
+                PmsConcentrationData<1, 12> reserved;
+            };
+        };
+    };
+
+
+    enum class PmsCmd : __uint24 {
+        CMD_READ_DATA = 0x0000e2L,
+        CMD_MODE_PASSIVE = 0x0000e1L,
+        CMD_MODE_ACTIVE = 0x0100e1L,
+        CMD_SLEEP = 0x0000e4L,
+        CMD_WAKEUP = 0x0100e4L,
+        CMD_RESET = 0xffffffL,
+    };
+
+    class Pms {
+    public:
+        tribool isModeActive() const {
+        tribool isModeSleep() const {
+        bool isWorking() const {
+        void setPinSleepMode(uint8_t value) {
+        void setPinReset(uint8_t value) {
+    public:
+        static constexpr decltype(timeout) TIMEOUT_PASSIVE = 68U;  // Transfer time of 1start + 32data + 1stop using 9600bps is 33 usec. TIMEOUT_PASSIVE could be at least 34, Value of 68 is an arbitrary doubled
+        static constexpr auto WAKEUP_TIME                  = 2500U; // Experimentally, time to get ready after reset/wakeup
+
+        Pms() : modeActive(tribool(unknown)), modeSleep(tribool(unknown)), timeout(TIMEOUT_PASSIVE) {
+        explicit Pms(IPmsSerial* pmsSerial) : Pms() {
+        ~Pms() {
+        void addSerial(IPmsSerial* pmsSerial) {
+        bool begin(void) {
+        void end(void) const {
+        bool initialized() {
+    public:
+        void setTimeout(decltype(timeout) timeout) {
+        decltype(timeout) getTimeout(void) const {
+        size_t available(void) {
+        bool waitForData(unsigned int maxTime, size_t nData = 0) {
+        PmsStatus read(PmsData& data) {
+        PmsStatus read(pmsData_t* data, size_t nData) {
+        bool write(PmsCmd cmd, unsigned int wakeupTime = Pms::WAKEUP_TIME) {
+```
+
+
+
+
+
+
+
+
 
 # API<a name="API"></a>
 
