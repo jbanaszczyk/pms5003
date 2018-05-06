@@ -71,7 +71,7 @@ void loop(void) {
         lastRead = newRead;
 
         auto view = data.particles;
-        for (auto i = 0; i < view.getSize(); ++i) {
+        for (PmsData::pmsIdx_t i = 0; i < view.getSize(); ++i) {
             Serial.print(view.getValue(i));
             Serial.print("\t");
             Serial.print(view.getName(i));

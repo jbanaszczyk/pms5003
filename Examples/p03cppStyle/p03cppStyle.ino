@@ -83,17 +83,18 @@ void loop(void) {
         Serial.println(newRead - lastRead);
         lastRead = newRead;
 
-        auto view = data.particles;
-        for (auto i = 0; i < view.SIZE; ++i) {
-            Serial.print(view[i]);
+        auto view = data.particles;     
+        for (auto i = decltype(view.SIZE){0}; i < view.getSize(); ++i) {
+            Serial.print(view.getValue(i));
             Serial.print("\t");
-            Serial.print(view.names[i]);
-            Serial.print("\t");
-            Serial.print(view.diameters[i]);
+            Serial.print(view.getName(i));
             Serial.print(" [");
-            Serial.print(view.metrics[i]);
+            Serial.print(view.getMetric(i));
             Serial.print("] ");
+            Serial.print(" Level: ");
             Serial.print(view.getLevel(i));
+            Serial.print(" | diameter: ");
+            Serial.print(view.getDiameter(i));
             Serial.println();
         }
         break;

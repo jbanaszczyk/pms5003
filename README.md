@@ -2,6 +2,10 @@
 
 I'm proud to present my Arduino library supporting PMS5003 Air Quality Sensor.
 
+## License
+
+pms5003 library is distributed under [Boost Software License 1.0 (BSL-1.0)](https://www.boost.org/LICENSE_1_0.txt). 
+
 ## Status
 
 ### Current revision: 2.00 RC
@@ -59,7 +63,9 @@ If you are interested in support of your sensor: feel free to ask.
 * New methods: some more checks
   * checkResetPin - check if declared reset pin works fine (check if it resets the sensor)
   * checkSleepPin - check if declared sleep/wake up pin is properly connected
-* Refactor isWorking() to tribool
+* write() will return PmsStatus instead of bool
+* add begin() and end for views: `for ( auto item : view) {`
+* isWorking() should return tribool
 * Use PROGMEM to store some static data (mostly strings)
 * Support for platforms
   * More platforms:

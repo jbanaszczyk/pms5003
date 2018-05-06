@@ -23,12 +23,6 @@ To use another communication library:
 
 Described in [Initialization C++ Style](README.md#initialization-c-style)
 
-## #define NOMINMAX
-
-It is a common meaning of NOMINMAX. It introduces function templates min() and max() instead of macros.
-
-Unfortunately Arduino does not implement C++ Standard Library, there is a lack of `std::common_type`, so my implementation is not complete. Uncomment at your own risk.
-
 # tribool.h
 
 It is a port of [boost.tribool](http://www.boost.org/doc/libs/1_63_0/doc/html/tribool.html) library - tristate logic: yes/no/unknown. It is used as a type of return value of `isModeActive()` and `isModeSleep()`. Sample code:
@@ -62,6 +56,31 @@ Almost all entities defined by <pms.h> are located in `pmsx` namespace.
 
 Please refer to [namespace pmsx{}](README.md#namespace-pmsx) description how to save typing _pmsx::_
 
+## pmsxApiVersion
+
+* `constexpr char pmsxApiVersion[]`
+  * defines some kind of pms5003 API version
+
+## PmsStatus
+
+* class PmsStatus
+  * status of read() operations. PmsStatus looks like enum class, but there is additional method getErrorMsg()
+  * values:
+    * PmsStatus::OK
+    * PmsStatus::NO_DATA
+    * PmsStatus::READ_ERROR
+    * PmsStatus::FRAME_LENGTH_MISMATCH
+    * PmsStatus::SUM_ERROR
+    * PmsStatus::NO_SERIAL
+  * getErrorMsg()
+    * returns description of the status
+
+## pmsData_t
+
+* `typedef ... pmsData_t`
+  * type of data transmitted from PMS5003 sensor
+
+
 
 
 
@@ -94,21 +113,9 @@ Please refer to [namespace pmsx{}](README.md#namespace-pmsx) description how to 
 ## TODO
 
 ```
-    auto constexpr pmsxVersion = 0x0200;
 
-    typedef uint16_t pmsData_t;
+    
 
-    class PmsStatus {
-        explicit PmsStatus(pmsStatus_t value);
-        operator pmsStatus_t();
-        static constexpr pmsStatus_t OK                    
-        static constexpr pmsStatus_t NO_DATA        
-        static constexpr pmsStatus_t READ_ERROR
-        static constexpr pmsStatus_t FRAME_LENGTH_MISMATCH 
-        static constexpr pmsStatus_t SUM_ERROR
-        static constexpr pmsStatus_t NO_SERIAL            
-        const char* getErrorMsg() 
-    };
 
     class PmsData {
         typedef uint8_t pmsIdx_t;

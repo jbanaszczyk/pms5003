@@ -18,7 +18,7 @@
 
 ////////////////////////////////////////
 
-// Some C++11 stuff
+// Some compatibility stuff
 
 #ifndef _countof
 template <typename _CountofType, size_t _SizeOfArray>
@@ -35,7 +35,7 @@ using __uint24 = uint32_t;
 
 namespace pmsx {
 
-    auto constexpr pmsxVersion = 0x0200;
+    constexpr char pmsxApiVersion[] = "2.00 RC";
 
     typedef uint16_t pmsData_t;
 
