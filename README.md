@@ -40,18 +40,17 @@ There is one interesting fork supporting ESP8266: https://github.com/riverscn/pm
 
 Probably my library supports Plantover PMS700x, PMS300x without any problems.
 
-If you are interested in support of your sensor: feel free to ask.
-
 ## Features
 
-* Supports all Plantover PMS5003 features (sleep/wake up, passive/active modes, hardware pins),
+* Library supports all Plantover PMS5003 features (sleep & wake up, passive / active modes, hardware pins),
 * Highly customizable:
-  * Uses almost any serial communication library,
+  * It uses almost any serial communication library,
   * You have a choice to use or not to use: (C style) global variables or (C++ style) class instances.
 * Written from scratch,
-* Written in modern C++11.
+* Written in modern C++11 (please do not afraid - works fine with Arduino IDE).
 * It is "headers only" library.
 * __The main goal__: Reading data from the sensor does not block. Your process receives the status `OK` or `NO_DATA` or some kinds of errors but your process never waits for the data.
+* Serial port is not managed by the library, it is possible to shut serial driver down, enter sleep mode and so on independently on the PMS5003 sensor.
 * Provides support for ISO 14644-1 classification of air cleanliness levels.
 
 ## API
@@ -61,21 +60,18 @@ If you are interested in support of your sensor: feel free to ask.
 ## TODO
 
 * New methods: some more checks
-  * checkResetPin - check if declared reset pin works fine (check if it resets the sensor)
-  * checkSleepPin - check if declared sleep/wake up pin is properly connected
-* write() will return PmsStatus instead of bool
-* add begin() and end for views: `for ( auto item : view) {`
-* isWorking() should return tribool
+  * `checkResetPin()` - check if declared reset pin works fine (check if it resets the sensor)
+  * `checkSleepPin()` - check if declared sleep/wake up pin is properly connected
+* `write()` will return `PmsStatus` instead of `bool`
+* add iterators `begin()` and `end()` for views
+* `isWorking()` should return `tribool`
 * Use PROGMEM to store some static data (mostly strings)
-* Support for platforms
-  * More platforms:
-    * PlatformIO
-    * CLion
-    * ...
+* Support for platforms  
+  * PlatformIO
+  * CLion  
 * Support for boards:
   * ESP8266
 * Add unit tests
-  * There are no unit tests yet :(
 
 ## Preparation
 
@@ -92,7 +88,7 @@ pms5003 library was successfully checked using:
 
 * Current version uses [DrDiettrich' fork of AltSoftSerial Library](https://github.com/DrDiettrich/AltSoftSerial.git). Install it.
   * pms5003 will not compile using original AltSoftSerial lib.
-* pms5003 will not compile using __old__ Arduino IDE. Please upgrade.
+* pms5003 will not compile using __very old__ Arduino IDE. Please upgrade.
 
 ### Library
 
@@ -103,7 +99,7 @@ Install pms5003 library.
 * PMS5003 Pin 1 (black): VCC +5V
 * PMS5003 Pin 2 (brown): GND
 
-**Important**: pms5003 uses 3.3V logic. Use converters if required or make sure your Arduino board uses 3.3V logic too.
+**Important**: PMS5003 sensor uses 3.3V logic. Use converters if required or make sure your Arduino board uses 3.3V logic too.
 * PMS5003 Pin 4 (blue): Arduino pin 9 (there is no choice, it is forced by AltSerial)
 * PMS5003 Pin 5 (green): Arduino pin 8 (there is no choice, it is forced by AltSerial)
 * Optional
@@ -127,7 +123,7 @@ pmsx::Pms pms(&pmsSerial);
 void setup(void) {
     Serial.begin(115200);
     while (!Serial) {}
-    Serial.println("PMS5003");
+    Serial.println(pmsx::pmsxApiVersion);
 
     if (!pms.begin()) {
         Serial.println("PMS sensor: communication failed");
@@ -228,9 +224,9 @@ Wait time 912
 ### Before
 
 To use the library:
-* install the [pms5003 library](https://github.com/jbanaszczyk/pms5003/archive/master.zip)
-* install [DrDiettrich' fork of AltSoftSerial Library](https://github.com/DrDiettrich/AltSoftSerial/archive/master.zip)
-* include the header `#include <pms.h>`
+* install (download and "Add .ZIP library") [DrDiettrich' fork of AltSoftSerial Library](https://github.com/DrDiettrich/AltSoftSerial/archive/master.zip)
+* install (download and "Add .ZIP library") [pms5003 library](https://github.com/jbanaszczyk/pms5003/archive/master.zip)
+* include `pms.h` in your code:
 
 ```C++
 #include <pms.h>
@@ -282,7 +278,7 @@ If pins are not connected - just remove appropriate `setPinReset`/`setPinSleepMo
 
 The next task is to put sensor in a well known state.
 There are two aspects of PMS5003 state:
-* sleep/waken up
+* sleeping/awoken
 * passive/active
 
 Both can be examined using `isModeActive()`/`isModeSleep()`. Please note, that result value is a tristate logic `tribool`: Yes / No / I don't know. Please refer to [boost `tribool` library description](https://www.boost.org/doc/libs/1_67_0/doc/html/tribool.html)
