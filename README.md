@@ -406,10 +406,10 @@ Each "view" provides similar interface:
   * `Serial.print(view.getName(i));`
 * use `.getMetric()` to get unit of measure for particular data; for example "/0.1L"
   * `Serial.print(view.getMetric(i));`
-* use `.getDiameter()` to get particle diameter corresponding to particular data; for example `1.0F`
+* use `.getDiameter()` to get particle diameter corresponding to particular data; for example 1.0F
   * `Serial.print(view.getDiameter(i));`
 * additionally: `particles` "view" provides `.getLevel()` - ISO classification of air cleanliness
-  * Serial.print(view.getLevel(i));
+  * `Serial.print(view.getLevel(i));`
 
 Such a "views" (data partitions) are implemented with no execution time nor memory overhead.
 
@@ -462,10 +462,10 @@ If you prefer C style: constants and arrays instead of method calls - please not
   * `Serial.print(view.names[i]);`
 * use `.metrics[]` array to get unit of measure for particular data; for example "/0.1L"
   * `Serial.print(view.metrics[i]);`
-* use `.diameters[]` to get particle diameter corresponding to particular data
+* use `.diameters[]` to get particle diameter corresponding to particular data; for example 1.0F
   * `Serial.print(view.diameters[i]);`
 * additionally: `particles` "view" provides `.getLevel()` - ISO classification of air cleanliness. It is not implemented as array - it is a function (a method)
-  * Serial.print(view.getLevel(i));
+  * `Serial.print(view.getLevel(i));`
 
 **Which one is better?** It doesn't matter - code size, memory usage and resulting code is exactly the same using both approaches.
 
@@ -473,7 +473,7 @@ If you prefer C style: constants and arrays instead of method calls - please not
 
 Common pattern in C++ is "initialization in constructor". Unfortunately Arduino breaks that rule.
 
-Code from: hardware\arduino\avr\cores\arduino\main.cpp (modified for simplicity)
+There is a code from: hardware\arduino\avr\cores\arduino\main.cpp modified for simplicity
 
 ```C
 // global variables constructors are executed before main()
@@ -501,7 +501,7 @@ There are at least two possible solutions:
 
 ##### initialization: begin()
 
-If you are not sure, if everything was properly initialized - execute `begin()` manually and check the result.
+By the way: if you are not sure if everything was properly initialized - execute `begin()` manually and check the result.
 
 
 ##### C/Arduino way
@@ -524,6 +524,7 @@ void setup(void) {
 * Edit pmsConfig.h file, uncomment line `#define PMS_DYNAMIC`
 * [Examples\p03cppStyle\p03cppStyle.ino](https://github.com/jbanaszczyk/pms5003/blob/master/Examples/p03cppStyle/p03cppStyle.ino)
 * Create static variable of type `*Pms` (reference to `Pms`)
+* Do nothing prior to main()
 * During `setup()` create new object of type `Pms`, assign created object to the reference from previous step
   * `Pms()` constructor is executed automatically
   * `Pms()` constructor executes `begin()`
@@ -541,6 +542,8 @@ void setup(void) {
     if (!pms->initialized()) {
 ```
 
+**Which one is better?** C/Arduino way and using `begin()` where it is needed leads to smaller code size and is closer to Arduino programming style.
+
 # Final notes
 
 ## API
@@ -549,11 +552,13 @@ void setup(void) {
 
 ## Operations on serial port
 
-Serial interface **is not managed** by `Pms`. You can stop it down, enter sleep mode, even replace serial port. Just remember to execute `pms.begin()` to reinitialize connection.
+Serial interface **is not managed** by `Pms`. You can suspend data transfer, enter sleep mode, even replace serial port. Just remember to execute `pms.begin()` to reinitialize the connection.
 
 ## namespace pmsx{}
 
-`pms5003` library is designed to avoid namespace pollution. All classes are located in namespace `pmsx`. Examples use the fully qualified names like **pmsx::**`Pms pms(&pmsSerial);`
+`pms5003` library is designed to avoid namespace pollution. All classes are located in the namespace `pmsx`.
+
+Examples use the fully qualified names like **pmsx::**`Pms pms(&pmsSerial);`
 
 To reduce typing it is OK to add `using namespace pmsx;` at the beginning and not to type _pmsx::_ anymore as in [Examples\p04usingPmsx\p04usingPmsx.ino](https://github.com/jbanaszczyk/pms5003/blob/master/Examples/p04usingPmsx/p04usingPmsx.ino)
 
