@@ -558,7 +558,7 @@ Serial interface **is not managed** by `Pms`. You can suspend data transfer, ent
 
 `pms5003` library is designed to avoid namespace pollution. All classes are located in the namespace `pmsx`.
 
-Examples use the fully qualified names like **pmsx::**`Pms pms(&pmsSerial);`
+Examples use the fully qualified names like `pmsx::Pms pms(&pmsSerial);`
 
 To reduce typing it is OK to add `using namespace pmsx;` at the beginning and not to type _pmsx::_ anymore as in [Examples\p04usingPmsx\p04usingPmsx.ino](https://github.com/jbanaszczyk/pms5003/blob/master/Examples/p04usingPmsx/p04usingPmsx.ino)
 
