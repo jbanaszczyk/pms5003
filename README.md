@@ -281,11 +281,11 @@ There are two aspects of PMS5003 state:
 * sleeping/awoken
 * passive/active
 
-Both can be examined using `isModeActive()`/`isModeSleep()`. Please note, that result value is a tristate logic `tribool`: Yes / No / I don't know. Please refer to [boost `tribool` library description](https://www.boost.org/doc/libs/1_67_0/doc/html/tribool.html)
+Both can be examined using `isModeActive()`/`isModeSleep()`. Please note, that result value is a tristate logic `tribool`: Yes / No / I don't know. Please refer to [boost.tribool library description](https://www.boost.org/doc/libs/1_67_0/doc/html/tribool.html)
 
-Please note, that it is possible, that Arduino was restarted, but PMS5003 was set in a strange state and it was not restarted.
+Please note, that it is possible, that Arduino was restarted for any reason, but PMS5003 was set in a strange state and it was not restarted. It is the reason, that initial states of PMS5003 is "I don't know"
 
-Well known state (woken up and active) can be achieved after sensor reset or sleep+wakeup sequence
+Well known state (awoken and active) can be achieved after sensor hardware reset or sleep+wakeup sequence
 
 ```C++
     if (!pms.write(pmsx::PmsCmd::CMD_RESET)) {
@@ -295,7 +295,7 @@ Well known state (woken up and active) can be achieved after sensor reset or sle
 ```
 
 The next task is to make sure, that Arduino can communicate with PMS5003. To accomplish the task we are:
-* forcing passive mode (PMS5003 sends data if asked),
+* forcing passive mode (PMS5003 sends data only if asked),
 * ask for data,
 * wait for the response
 * and check the response
@@ -315,7 +315,7 @@ The next task is to make sure, that Arduino can communicate with PMS5003. To acc
     }
 ```
 
-Finally we put PMS5003 in active mode - it sends data periodically and automatically.
+Finally we put back PMS5003 in active mode - it sends data periodically and automatically.
 
 ```C++
     pms.write(pmsx::PmsCmd::CMD_MODE_ACTIVE);
@@ -334,14 +334,14 @@ Try to read the data :
     switch (status) {
 ```
 
-If there is something interesting - display it:
+If there is something interesting: display it:
 
 ```C++
     case pmsx::PmsStatus::OK: {
         ....
 ```
 
-If there is are no data: do something else:
+If there are no data: do something else:
 
 ```C++
     case pmsx::PmsStatus::NO_DATA:
@@ -366,14 +366,14 @@ Lets go back to the situation where there is something interesting:
 #### views
 
 Data received from PMS5003 (see [Appendix I](https://github.com/jbanaszczyk/pms5003/blob/master/doc/pms5003-manual_v2-3.pdf)) may be worth attention:
-* as a whole (12 numbers)
+* as a whole (13 `pmsx::pmsData_t` numbers, that is 13 `unsigned int` numbers)
 * in groups:
   * (3 numbers) PM 1.0/2.5/10.0 concentration unit µ g/m3 (CF=1,standard particle) (_really? I have no idea what does it mean_)
   * (3 numbers) PM 1.0/2.5/10.0 concentration unit µ g/m3 (under atmospheric environment) (_looks good_)
   * (6 numbers) the number of particles with diameter beyond 0.3/0.5/1.0/2.5/5.0/10.0 um in 0.1 L of air (_very tasty data, it fits into ISO 14644-1 classification of air cleanliness levels_)
   * (1 number) reserved data, without any real meaning
 
-To get access to them use:
+To get access to them:
 
 ```C++
         auto view = data.raw;
@@ -406,7 +406,7 @@ Each "view" provides similar interface:
   * `Serial.print(view.getName(i));`
 * use `.getMetric()` to get unit of measure for particular data; for example "/0.1L"
   * `Serial.print(view.getMetric(i));`
-* use `.getDiameter()` to get particle diameter corresponding to particular data
+* use `.getDiameter()` to get particle diameter corresponding to particular data; for example `1.0F`
   * `Serial.print(view.getDiameter(i));`
 * additionally: `particles` "view" provides `.getLevel()` - ISO classification of air cleanliness
   * Serial.print(view.getLevel(i));
