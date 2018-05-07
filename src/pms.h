@@ -35,7 +35,7 @@ using __uint24 = uint32_t;
 
 namespace pmsx {
 
-    constexpr char pmsxApiVersion[] = "2.00 RC";
+    constexpr char pmsxApiVersion[] = "pms5003 2.00 RC";
 
     typedef uint16_t pmsData_t;
 
@@ -218,12 +218,12 @@ namespace pmsx {
     static_assert(sizeof(PmsData) == PmsData::DATA_SIZE * sizeof(pmsData_t), "PmsData: wrong sizeof()");
 
     enum class PmsCmd : __uint24 {
-        CMD_READ_DATA = 0x0000e2L,
-        CMD_MODE_PASSIVE = 0x0000e1L,
-        CMD_MODE_ACTIVE = 0x0100e1L,
-        CMD_SLEEP = 0x0000e4L,
-        CMD_WAKEUP = 0x0100e4L,
-        CMD_RESET = 0xffffffL,
+        CMD_READ_DATA = __uint24{0x0000e2},
+        CMD_MODE_PASSIVE = __uint24{0x0000e1},
+        CMD_MODE_ACTIVE = __uint24{0x0100e1},
+        CMD_SLEEP = __uint24{0x0000e4},
+        CMD_WAKEUP = __uint24{0x0100e4},
+        CMD_RESET = __uint24{0xffffff},
     };
 
     class Pms {

@@ -19,7 +19,7 @@ pmsx::Pms pms(&pmsSerial);
 void setup(void) {
     Serial.begin(115200);
     while (!Serial) {}
-    Serial.println("PMS5003");
+    Serial.println(pmsx::pmsxApiVersion);
 
     if (!pms.begin()) {
         Serial.println("PMS sensor: communication failed");

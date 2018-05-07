@@ -203,9 +203,10 @@ void loop(void) {
 
 And the result is (something like this):
 ```
-PMS5003
+pms5003 2.00 RC
 Time of setup(): 2589
-Wait time 910
+________________
+Wait time 909
 0	Particles > 0.3 micron [/0.1L]  Level: 0.00 | diameter: 0.30
 0	Particles > 0.5 micron [/0.1L]  Level: 0.00 | diameter: 0.50
 0	Particles > 1.0 micron [/0.1L]  Level: 0.00 | diameter: 1.00
@@ -213,11 +214,11 @@ Wait time 910
 0	Particles > 5.0 micron [/0.1L]  Level: 0.00 | diameter: 5.00
 0	Particles > 10. micron [/0.1L]  Level: 0.00 | diameter: 10.00
 _________________
-Wait time 910
-0	Particles > 0.3 micron [/0.1L]  Level: 0.00 | diameter: 0.30
-0	Particles > 0.5 micron [/0.1L]  Level: 0.00 | diameter: 0.50
-0	Particles > 1.0 micron [/0.1L]  Level: 0.00 | diameter: 1.00
-0	Particles > 2.5 micron [/0.1L]  Level: 0.00 | diameter: 2.50
+Wait time 912
+8817	Particles > 0.3 micron [/0.1L]  Level: 8.94 | diameter: 0.30
+2539	Particles > 0.5 micron [/0.1L]  Level: 8.86 | diameter: 0.50
+2406	Particles > 1.0 micron [/0.1L]  Level: 9.46 | diameter: 1.00
+1	Particles > 2.5 micron [/0.1L]  Level: 6.91 | diameter: 2.50
 0	Particles > 5.0 micron [/0.1L]  Level: 0.00 | diameter: 5.00
 0	Particles > 10. micron [/0.1L]  Level: 0.00 | diameter: 10.00
 ```
