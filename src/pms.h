@@ -453,10 +453,7 @@ namespace pmsx {
             return available() >= nData;
         }
 
-        PmsStatus read(PmsData& data) {
-            return read(reinterpret_cast<pmsData_t *>(&data.raw), data.raw.getSize());
-        }
-
+    private:
         PmsStatus read(pmsData_t* data, size_t nData) {
             if (!pmsSerial) {
                 return PmsStatus{PmsStatus::NO_SERIAL};
@@ -522,6 +519,11 @@ namespace pmsx {
 
             dataReceived = true;
             return PmsStatus{PmsStatus::OK};
+        }
+
+    public:
+        PmsStatus read(PmsData& data) {
+            return read(reinterpret_cast<pmsData_t *>(&data.raw), data.raw.getSize());
         }
 
     private:
