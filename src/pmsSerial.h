@@ -6,7 +6,7 @@ public:
 	virtual bool begin(uint32_t baudRate);
 	virtual void end();
 
-	virtual void setTimeout(unsigned long timeout);
+	virtual void setTimeout(unsigned long int timeout);
 	virtual size_t available();
 
 	virtual void flushInput();

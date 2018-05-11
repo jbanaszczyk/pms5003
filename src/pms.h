@@ -583,7 +583,7 @@ namespace pmsx {
         }
 
     public:
-        bool write(PmsCmd cmd, unsigned int wakeupTime = Pms::WAKEUP_TIME) {
+        bool write(PmsCmd cmd, unsigned int wakeupTime = WAKEUP_TIME) {
             static_assert(sizeof cmd >= 3, "Wrong definition of PmsCmd (too short)");
 
             if (cmd == PmsCmd::CMD_RESET) {

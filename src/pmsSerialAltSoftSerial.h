@@ -6,7 +6,7 @@
 class PmsAltSerial : public IPmsSerial {
 	AltSoftSerial serial;
 public:
-	void setTimeout(const unsigned long timeout) override {
+	void setTimeout(const unsigned long int timeout) override {
 		serial.setTimeout(timeout);
 	}
 
