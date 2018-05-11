@@ -78,7 +78,7 @@ namespace pmsx {
         static const float DIAMETERS[DATA_SIZE];
         static const char* const METRICS[DATA_SIZE];
     public:
-        static const size_t RESPONSE_FRAME_SIZE = (1 + 3) * sizeof(pmsData_t); // Frame size for single pmsData_t response (after write command)
+        static constexpr size_t RESPONSE_FRAME_SIZE = (1 + 3) * sizeof(pmsData_t); // Frame size for single pmsData_t response (after write command)
         static constexpr size_t FRAME_SIZE      = (DATA_SIZE + 3) * sizeof(pmsData_t); // useful for waitForData()
         static constexpr size_t getFrameSize() {
             return FRAME_SIZE;
