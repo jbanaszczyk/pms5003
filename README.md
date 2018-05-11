@@ -60,7 +60,7 @@ Probably my library supports Plantover PMS700x, PMS300x without any problems.
 ## TODO
 
 * New methods: some more checks
-  * `checkResetPin()` - check if declared reset pin works fine (check if it resets the sensor)
+  * #14 `checkResetPin()` - check if declared reset pin works fine (check if it resets the sensor)
   * `checkSleepPin()` - check if declared sleep/wake up pin is properly connected
 * `write()` will return `PmsStatus` instead of `bool`
 * add iterators `begin()` and `end()` for views
