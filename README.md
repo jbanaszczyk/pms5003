@@ -4,7 +4,7 @@ I'm proud to present my Arduino library supporting PMS5003 Air Quality Sensor.
 
 ## License
 
-pms5003 library is distributed under [Boost Software License 1.0 (BSL-1.0)](https://www.boost.org/LICENSE_1_0.txt). 
+pms5003 library is distributed under [Boost Software License 1.0 (BSL-1.0)](https://www.boost.org/LICENSE_1_0.txt).
 
 ## Status
 
@@ -61,19 +61,19 @@ Probably my library supports Plantover PMS700x, PMS300x without any problems.
 
 * New methods: some more checks
   * [#14](/../../issues/14) `checkResetPin()` - check if declared reset pin works fine (check if it resets the sensor)
-  * `checkSleepPin()` - check if declared sleep/wake up pin is properly connected
-* `write()` will return `PmsStatus` instead of `bool`
-* add iterators `begin()` and `end()` for views
-* `isWorking()` should return `tribool`
-* `write(CMD_WAKEUP)` should not delay if already awoken
-* `write()` multiple commands sequentially
-* Use PROGMEM to store some static data (mostly strings)
-* Support for platforms  
-  * PlatformIO
-  * CLion  
+  * [#15](/../../issues/15) `checkSleepPin()` - check if declared sleep/wake up pin is properly connected
+* [#16](/../../issues/16) `write()` will return `PmsStatus` instead of `bool`
+* [#17](/../../issues/17) add iterators `begin()` and `end()` for views
+* [#18](/../../issues/18) `isWorking()` should return `tribool`
+* [#19](/../../issues/19) `write(CMD_WAKEUP)` should not delay if already awoken
+* [#20](/../../issues/20) `write()` multiple commands sequentially
+* [#21](/../../issues/21) Use PROGMEM to store some static data (mostly strings)
+* Support for platforms
+  * [#22](/../../issues/22) PlatformIO
+  * [#23](/../../issues/23) CLion
 * Support for boards:
-  * ESP8266
-* Add unit tests
+  * [#24](/../../issues/24) ESP8266
+* [#25](/../../issues/25) Add unit tests
 
 ## Preparation
 
