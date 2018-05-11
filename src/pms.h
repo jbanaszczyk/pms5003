@@ -35,7 +35,7 @@ using __uint24 = uint32_t;
 
 namespace pmsx {
 
-    constexpr char pmsxApiVersion[] = "pms5003 2.00 RC";
+    constexpr char pmsxApiVersion[] = "pms5003 2.00";
 
     typedef uint16_t pmsData_t;
 
@@ -45,7 +45,7 @@ namespace pmsx {
     public:
         explicit PmsStatus(pmsStatus_t value) : value(value) {}
 
-        operator pmsStatus_t() {
+        operator pmsStatus_t() const {
             return value;
         }
 
@@ -301,7 +301,7 @@ namespace pmsx {
         optionalPin_t pinSleepMode;
         optionalPin_t pinReset;
 
-        void setupHardwarePin(uint8_t value) {
+        static void setupHardwarePin(uint8_t value) {
             digitalWrite(value, HIGH);
             pinMode(value, OUTPUT);
             digitalWrite(value, HIGH);
@@ -373,7 +373,7 @@ namespace pmsx {
             }
         }
 
-        bool initialized() {
+        bool initialized() const {
             return pmsSerial;
         }
 
@@ -398,7 +398,7 @@ namespace pmsx {
 
         ////////////////////////////////////////
 
-        void sumBuffer(uint16_t* sum, const uint8_t* buffer, uint16_t cnt) {
+        static void sumBuffer(uint16_t* sum, const uint8_t* buffer, uint16_t cnt) {
             for (; cnt > 0; --cnt, ++buffer) {
                 *sum += *buffer;
             }
@@ -601,7 +601,7 @@ namespace pmsx {
             if (pmsSerial->write(sig, sizeof(sig)) != sizeof(sig)) {
                 return false;
             }
-            const size_t cmdSize = 3;
+            constexpr auto cmdSize = uint8_t{3};
             if (pmsSerial->write((uint8_t*)&cmd, cmdSize) != cmdSize) {
                 return false;
             }

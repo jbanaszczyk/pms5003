@@ -8,14 +8,11 @@ pms5003 library is distributed under [Boost Software License 1.0 (BSL-1.0)](http
 
 ## Status
 
-### Current revision: 2.00 RC
+### Current revision: 2.00
 
-It is not published as a release yet
+[release: 2.0](https://github.com/jbanaszczyk/pms5003/releases/tag/2.0)
 
-Code in repository (branch: master) is 2.00 RC
-* It looks stable - development is finished
-* README have to be updated
-* There are some TODOs for next revisions
+* There are some [TODOs](/../../issues)  for next revisions
 
 ### What is new?
 
