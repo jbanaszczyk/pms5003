@@ -65,6 +65,8 @@ Probably my library supports Plantover PMS700x, PMS300x without any problems.
 * `write()` will return `PmsStatus` instead of `bool`
 * add iterators `begin()` and `end()` for views
 * `isWorking()` should return `tribool`
+* `write(CMD_WAKEUP)` should not delay if already awoken
+* `write()` multiple commands sequentially
 * Use PROGMEM to store some static data (mostly strings)
 * Support for platforms  
   * PlatformIO
