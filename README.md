@@ -8,7 +8,7 @@ pms5003 library is distributed under [Boost Software License 1.0 (BSL-1.0)](http
 
 ## Status
 
-### Current revision: 2.00
+### Current revision: 2.0
 
 [release: 2.0](https://github.com/jbanaszczyk/pms5003/releases/tag/2.0)
 
@@ -27,7 +27,7 @@ Release 2.0 brings a lot of changes and improvements:
 * Added more diagnostic checks
 * Added support for "views" (will be described later) - the most exciting new feature.
 
-### Good, stable revision: 1.00
+### Good, stable revision: 1.0
 
 Previous [release: 1.0](https://github.com/jbanaszczyk/pms5003/releases/tag/1.0) is still available.
 
