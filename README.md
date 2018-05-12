@@ -19,7 +19,7 @@ pms5003 library is distributed under [Boost Software License 1.0 (BSL-1.0)](http
 Release 2.0 brings a lot of changes and improvements:
 
 * API contract (class names and methods) is completely rewritten. It is not compatible with v1.0. Sorry :(
-* Minor bugs are fixed (nothing important, release 1.00 should be assumed as stable).
+* Minor bugs are fixed (nothing important, release 1.0 should be assumed as stable).
 * Added support for sensor hardware pins (pin 3 - SET, pin 6 - RESET).
 * Added support for more serial port libraries (inversion of control).
 * Added support for unit tests (soon).
@@ -198,7 +198,7 @@ void loop(void) {
 
 And the result is (something like this):
 ```
-pms5003 2.00 RC
+pms5003 2.00
 Time of setup(): 2589
 ________________
 Wait time 909
