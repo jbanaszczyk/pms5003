@@ -198,7 +198,7 @@ void loop(void) {
 
 And the result is (something like this):
 ```
-pms5003 2.00 RC
+pms5003 2.00
 Time of setup(): 2589
 ________________
 Wait time 909
@@ -367,8 +367,8 @@ Lets go back to the situation where there is something interesting:
 Data received from PMS5003 (see [Appendix I](https://github.com/jbanaszczyk/pms5003/blob/master/doc/pms5003-manual_v2-3.pdf)) may be worth attention:
 * as a whole (13 `pmsx::pmsData_t` numbers, that is 13 `unsigned int` numbers)
 * in groups:
-  * (3 numbers) PM 1.0/2.5/10.0 concentration unit µ g/m3 (CF=1,standard particle) (_really? I have no idea what does it mean_)
-  * (3 numbers) PM 1.0/2.5/10.0 concentration unit µ g/m3 (under atmospheric environment) (_looks good_)
+  * (3 numbers) PM 1.0/2.5/10.0 concentration unit Âµ g/m3 (CF=1,standard particle) (_really? I have no idea what does it mean_)
+  * (3 numbers) PM 1.0/2.5/10.0 concentration unit Âµ g/m3 (under atmospheric environment) (_looks good_)
   * (6 numbers) the number of particles with diameter beyond 0.3/0.5/1.0/2.5/5.0/10.0 um in 0.1 L of air (_very tasty data, it fits into ISO 14644-1 classification of air cleanliness levels_)
   * (1 number) reserved data, without any real meaning
 
