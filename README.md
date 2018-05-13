@@ -37,18 +37,9 @@ There is one interesting fork supporting ESP8266: https://github.com/riverscn/pm
 
 My library supports PMS5003 (checked)
 
-It is expected, that PMS1003, PMS6003, PMS7003 are properly supported
+For most [Plantover](http://www.plantower.com) sensors probably it is an easy task to add support.
 
-Not supported yet sensors:
-PMS3003 [#14](/../../issues/14)
-PMS5003T
-PMS5003ST
-
-
-
-
-[pms5003 API description](API.md)
-
+[list of compatible sensors](Compatibilit.md) is available as a separate document.
 
 ## Features
 
