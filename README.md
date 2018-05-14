@@ -39,7 +39,7 @@ My library supports PMS5003 (checked)
 
 For most [Plantover](http://www.plantower.com) sensors probably it is an easy task to add support.
 
-[list of compatible sensors](Compatibilit.md) is available as a separate document.
+[list of compatible sensors](Compatibility.md) is available as a separate document.
 
 ## Features
 

@@ -68,7 +68,7 @@ void loop(void) {
         Serial.println(newRead - lastRead);
         lastRead = newRead;
 
-        auto view = data.particles;
+        auto view = data.raw;
         for (pmsx::PmsData::pmsIdx_t i = 0; i < view.getSize(); ++i) {
             Serial.print(view.getValue(i));
             Serial.print("\t");
@@ -76,8 +76,8 @@ void loop(void) {
             Serial.print(" [");
             Serial.print(view.getMetric(i));
             Serial.print("] ");
-            Serial.print(" Level: ");
-            Serial.print(view.getLevel(i));
+//            Serial.print(" Level: ");
+//            Serial.print(view.getLevel(i));
             Serial.print(" | diameter: ");
             Serial.print(view.getDiameter(i));
             Serial.println();
