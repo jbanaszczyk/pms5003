@@ -40,7 +40,7 @@ Previous [release: 1.0](https://github.com/jbanaszczyk/pms5003/releases/tag/1.0)
 
 There is one interesting fork supporting ESP8266: https://github.com/riverscn/pmsx003
 
-## Other boards
+## Other sensors
 
 My library supports PMS5003 (checked)
 
@@ -120,7 +120,7 @@ Install pms5003 library.
 
 ## Hello. The Basic scenario.<a name="Hello"></a>
 
-Use the code:  [Examples\p01basic\p01basic.ino](https://github.com/jbanaszczyk/pms5003/blob/master/Examples/p01basic/p01basic.ino)
+Use the code:  [examples\p01basic\p01basic.ino](https://github.com/jbanaszczyk/pms5003/blob/master/examples/p01basic/p01basic.ino)
 
 ```C++
 #include <pms.h>
@@ -445,7 +445,7 @@ Such a "views" (data partitions) are implemented with no execution time nor memo
 
 #### views: C style
 
-If you prefer C style: constants and arrays instead of method calls - please note [Examples\p02cStyle\p02cStyle.ino](https://github.com/jbanaszczyk/pms5003/blob/master/Examples/p02cStyle/p02cStyle.ino)
+If you prefer C style: constants and arrays instead of method calls - please note [examples\p02cStyle\p02cStyle.ino](https://github.com/jbanaszczyk/pms5003/blob/master/examples/p02cStyle/p02cStyle.ino)
 
 ```C++
         auto view = data.particles;
@@ -516,7 +516,7 @@ By the way: if you are not sure if everything was properly initialized - execute
 
 ##### C/Arduino way
 
-* [Examples\p01basic\p01basic.ino](https://github.com/jbanaszczyk/pms5003/blob/master/Examples/p01basic/p01basic.ino)
+* [examples\p01basic\p01basic.ino](https://github.com/jbanaszczyk/pms5003/blob/master/examples/p01basic/p01basic.ino)
 * Create static variable of type `Pms`, do nothing in constructor
 * Initialize it during `setup()`: call `pms.begin()`
 * Use it: call `pms.` methods
@@ -532,7 +532,7 @@ void setup(void) {
 ##### C++ way
 
 * Edit pmsConfig.h file, uncomment line `#define PMS_DYNAMIC`
-* [Examples\p03cppStyle\p03cppStyle.ino](https://github.com/jbanaszczyk/pms5003/blob/master/Examples/p03cppStyle/p03cppStyle.ino)
+* [examples\p03cppStyle\p03cppStyle.ino](https://github.com/jbanaszczyk/pms5003/blob/master/examples/p03cppStyle/p03cppStyle.ino)
 * Create static variable of type `*Pms` (reference to `Pms`)
 * Do nothing prior to main()
 * During `setup()` create new object of type `Pms`, assign created object to the reference from previous step
@@ -570,6 +570,6 @@ Serial interface **is not managed** by `Pms`. You can suspend data transfer, ent
 
 Examples use the fully qualified names like `pmsx::Pms pms(&pmsSerial);`
 
-To reduce typing it is OK to add `using namespace pmsx;` at the beginning and not to type _pmsx::_ anymore as in [Examples\p04usingPmsx\p04usingPmsx.ino](https://github.com/jbanaszczyk/pms5003/blob/master/Examples/p04usingPmsx/p04usingPmsx.ino)
+To reduce typing it is OK to add `using namespace pmsx;` at the beginning and not to type _pmsx::_ anymore as in [examples\p04usingPmsx\p04usingPmsx.ino](https://github.com/jbanaszczyk/pms5003/blob/master/examples/p04usingPmsx/p04usingPmsx.ino)
 
 It does not change resulting code size.
