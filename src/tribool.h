@@ -2,10 +2,8 @@
 
 #include <Arduino.h>
 
-class tribool;
-
 // Class contains Arduino port of Boost.Tribool
-// http://www.boost.org/doc/libs/1_63_0/doc/html/tribool.html
+// http://www.boost.org/doc/libs/1_67_0/doc/html/tribool.html
 //
 // Changes
 //   indeterminate state is named unknown
@@ -15,7 +13,9 @@ class tribool;
 // Ported by https://github.com/jbanaszczyk
 
 struct unknown_t {};
-constexpr inline bool unknown(tribool arg, unknown_t dummy = unknown_t());
+
+class tribool;
+constexpr bool unknown(tribool arg, unknown_t dummy = unknown_t());
 typedef bool(*unknown_keyword_t)(tribool, unknown_t);
 
 class tribool {
@@ -24,11 +24,11 @@ public:
 	constexpr tribool() : value(unknown_v) {}
 	constexpr tribool(bool v) : value(v ? true_v : false_v) {};
 	constexpr tribool(unknown_keyword_t) : value(unknown_v) {}
-	constexpr inline operator bool() const {
+	constexpr operator bool() const {
 		return value == tribool::true_v ? true : false;
 	};
 
-	constexpr inline tribool operator!() const {
+	constexpr tribool operator!() const {
 		return value == false_v
 			? tribool(true)
 			: value == true_v ? tribool(false) : tribool(unknown);
@@ -37,50 +37,50 @@ public:
 	bool isBool() const { return value == false_v || value == true_v; }
 };
 
-constexpr inline tribool operator&&(tribool lhs, tribool rhs) {
+constexpr tribool operator&&(tribool lhs, tribool rhs) {
 	return (static_cast<bool>(!lhs) || static_cast<bool>(!rhs))
 		? tribool(false)
 		: ((static_cast<bool>(lhs) && static_cast<bool>(rhs)) ? tribool(true) : unknown)
 		;
 }
 
-constexpr inline tribool operator&&(tribool lhs, bool rhs) { return rhs ? lhs : tribool(false); }
-constexpr inline tribool operator&&(bool lhs, tribool rhs) { return lhs ? rhs : tribool(false); }
-constexpr inline tribool operator&&(unknown_keyword_t, tribool lhs) { return !lhs ? tribool(false) : tribool(unknown); }
-constexpr inline tribool operator&&(tribool lhs, unknown_keyword_t) { return !lhs ? tribool(false) : tribool(unknown); }
+constexpr tribool operator&&(tribool lhs, bool rhs) { return rhs ? lhs : tribool(false); }
+constexpr tribool operator&&(bool lhs, tribool rhs) { return lhs ? rhs : tribool(false); }
+constexpr tribool operator&&(unknown_keyword_t, tribool lhs) { return !lhs ? tribool(false) : tribool(unknown); }
+constexpr tribool operator&&(tribool lhs, unknown_keyword_t) { return !lhs ? tribool(false) : tribool(unknown); }
 
-constexpr inline tribool operator||(tribool lhs, tribool rhs) {
+constexpr tribool operator||(tribool lhs, tribool rhs) {
 	return (static_cast<bool>(!lhs) && static_cast<bool>(!rhs))
 		? tribool(false)
 		: ((static_cast<bool>(lhs) || static_cast<bool>(rhs)) ? tribool(true) : tribool(unknown))
 		;
 }
 
-constexpr inline tribool operator||(tribool lhs, bool rhs) { return rhs ? tribool(true) : lhs; }
-constexpr inline tribool operator||(bool lhs, tribool rhs) { return lhs ? tribool(true) : rhs; }
-constexpr inline tribool operator||(unknown_keyword_t, tribool lhs) { return lhs ? tribool(true) : tribool(unknown); }
-constexpr inline tribool operator||(tribool lhs, unknown_keyword_t) { return lhs ? tribool(true) : tribool(unknown); }
+constexpr tribool operator||(tribool lhs, bool rhs) { return rhs ? tribool(true) : lhs; }
+constexpr tribool operator||(bool lhs, tribool rhs) { return lhs ? tribool(true) : rhs; }
+constexpr tribool operator||(unknown_keyword_t, tribool lhs) { return lhs ? tribool(true) : tribool(unknown); }
+constexpr tribool operator||(tribool lhs, unknown_keyword_t) { return lhs ? tribool(true) : tribool(unknown); }
 
-constexpr inline tribool operator==(tribool lhs, tribool rhs) {
+constexpr tribool operator==(tribool lhs, tribool rhs) {
 	return (unknown(lhs) || unknown(rhs))
 		? unknown
 		: ((lhs && rhs) || (!lhs && !rhs))
 		;
 }
-constexpr inline tribool operator==(tribool lhs, bool rhs) { return lhs == tribool(rhs); }
-constexpr inline tribool operator==(bool lhs, tribool rhs) { return tribool(lhs) == rhs; }
-constexpr inline tribool operator==(unknown_keyword_t, tribool lhs) { return tribool(unknown) == lhs; }
-constexpr inline tribool operator==(tribool lhs, unknown_keyword_t) { return tribool(unknown) == lhs; }
+constexpr tribool operator==(tribool lhs, bool rhs) { return lhs == tribool(rhs); }
+constexpr tribool operator==(bool lhs, tribool rhs) { return tribool(lhs) == rhs; }
+constexpr tribool operator==(unknown_keyword_t, tribool lhs) { return tribool(unknown) == lhs; }
+constexpr tribool operator==(tribool lhs, unknown_keyword_t) { return tribool(unknown) == lhs; }
 
-constexpr inline tribool operator!=(tribool lhs, tribool rhs) {
+constexpr tribool operator!=(tribool lhs, tribool rhs) {
 	return (unknown(lhs) || unknown(rhs))
 		? unknown
 		: !((lhs && rhs) || (!lhs && !rhs))
 		;
 }
-constexpr inline tribool operator!=(tribool lhs, bool rhs) { return lhs != tribool(rhs); }
-constexpr inline tribool operator!=(bool lhs, tribool rhs) { return tribool(lhs) != rhs; }
-constexpr inline tribool operator!=(unknown_keyword_t, tribool lhs) { return tribool(unknown) != lhs; }
-constexpr inline tribool operator!=(tribool lhs, unknown_keyword_t) { return lhs != tribool(unknown); }
+constexpr tribool operator!=(tribool lhs, bool rhs) { return lhs != tribool(rhs); }
+constexpr tribool operator!=(bool lhs, tribool rhs) { return tribool(lhs) != rhs; }
+constexpr tribool operator!=(unknown_keyword_t, tribool lhs) { return tribool(unknown) != lhs; }
+constexpr tribool operator!=(tribool lhs, unknown_keyword_t) { return lhs != tribool(unknown); }
 
-constexpr inline bool unknown(tribool arg, unknown_t dummy) { return false; };
+constexpr bool unknown(tribool arg, unknown_t dummy) { return arg.value == tribool::unknown_v; };
