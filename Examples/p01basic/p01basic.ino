@@ -5,14 +5,14 @@ pmsx::Pms pms(&pmsSerial);
 
 ////////////////////////////////////////
 
-// * PMS5003 Pin 1 (black) : VCC +5V
-// * PMS5003 Pin 2 (brown) : GND
+// * PMS5003 Pin 1 : VCC +5V
+// * PMS5003 Pin 2 : GND
 // Important: pms5003 uses 3.3V logic.Use converters if required or make sure your Arduino board uses 3.3V logic too.
-// * PMS5003 Pin 4 (blue) : Digital pin 9 (there is no choice, forced by AltSerial)
-// * PMS5003 Pin 5 (green) : Digital pin 8 (there is no choice, forced by AltSerial)
+// * PMS5003 Pin 4 : Digital pin 9 (there is no choice, forced by AltSerial)
+// * PMS5003 Pin 5 : Digital pin 8 (there is no choice, forced by AltSerial)
 // * Optional
-//   * PMS5003 Pin 3 (white) : Digital pin 7 (can be changed or not connected at all)
-//   * PMS5003 Pin 6 (violet) : Digital pin 6 (can be changed or not connected at all)
+//   * PMS5003 Pin 3 : Digital pin 7 (can be changed or not connected at all)
+//   * PMS5003 Pin 6 : Digital pin 6 (can be changed or not connected at all)
 
 ////////////////////////////////////////
 

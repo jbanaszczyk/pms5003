@@ -229,7 +229,7 @@ namespace pmsx {
     class Pms {
     private:
 
-        template <typename T, T NullValue>
+    	template <typename T, T NullValue>
         class compact_optional {
         private:
             T storage;
@@ -271,24 +271,24 @@ namespace pmsx {
         bool dataReceived;
         bool dataSent;
 
-        tribool modeActive;
-        tribool modeSleep;
+		jb::logic::tribool modeActive;
+		jb::logic::tribool modeSleep;
 
         void clrState() {
             dataReceived = false;
             dataSent     = false;
-            modeActive   = tribool(unknown);
-            modeSleep    = tribool(unknown);
+            modeActive   = jb::logic::tribool(jb::logic::unknown);
+            modeSleep    = jb::logic::tribool(jb::logic::unknown);
             pinSleepMode.unSet();
             pinReset.unSet();
         }
 
     public:
-        tribool isModeActive() const {
+		jb::logic::tribool isModeActive() const {
             return modeActive;
         }
 
-        tribool isModeSleep() const {
+		jb::logic::tribool isModeSleep() const {
             return modeSleep;
         }
 
@@ -331,7 +331,7 @@ namespace pmsx {
         static constexpr decltype(timeout) TIMEOUT_PASSIVE = 68U;  // Transfer time of 1start + 32data + 1stop using 9600bps is 33 usec. TIMEOUT_PASSIVE could be at least 34, Value of 68 is an arbitrary doubled
         static constexpr auto WAKEUP_TIME                  = 2500U; // Experimentally, time to get ready after reset/wakeup
 
-        Pms() : modeActive(tribool(unknown)), modeSleep(tribool(unknown)), timeout(TIMEOUT_PASSIVE) {
+        Pms() : modeActive(jb::logic::tribool(jb::logic::unknown)), modeSleep(jb::logic::tribool(jb::logic::unknown)), timeout(TIMEOUT_PASSIVE) {
             addSerial(nullptr);
         };
 
@@ -530,18 +530,18 @@ namespace pmsx {
         void setNewMode(const PmsCmd cmd) {
             switch (cmd) {
                 case PmsCmd::CMD_MODE_PASSIVE:
-                    modeActive = tribool(false);
+                    modeActive = jb::logic::tribool(false);
                     break;
                 case PmsCmd::CMD_MODE_ACTIVE:
-                    modeActive = tribool(true);
+                    modeActive = jb::logic::tribool(true);
                     break;
                 case PmsCmd::CMD_SLEEP:
-                    modeSleep = tribool(true);
+                    modeSleep = jb::logic::tribool(true);
                     break;
                 case PmsCmd::CMD_WAKEUP:
                 case PmsCmd::CMD_RESET:
-                    modeSleep  = tribool(false);
-                    modeActive = tribool(true);
+                    modeSleep  = jb::logic::tribool(false);
+                    modeActive = jb::logic::tribool(true);
                     break;
                 default:
                     break;

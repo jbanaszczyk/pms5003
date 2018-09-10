@@ -106,7 +106,7 @@ Install pms5003 library.
 
 ### Connections
 
-* PMS5003 Pin 1 (black): VCC +5V
+* PMS5003 Pin 1 (violet): VCC +5V
 * PMS5003 Pin 2 (brown): GND
 
 **Important**: PMS5003 sensor uses 3.3V logic. Use converters if required or make sure your Arduino board uses 3.3V logic too.
@@ -114,7 +114,8 @@ Install pms5003 library.
 * PMS5003 Pin 5 (green): Arduino pin 8 (there is no choice, it is forced by AltSerial)
 * Optional
   * PMS5003 Pin 3 (white): Arduino pin 7 (can be changed or not connected at all)
-  * PMS5003 Pin 6 (violet): Arduino pin 6 (can be changed or not connected at all)
+  * PMS5003 Pin 6 (yellow): Arduino pin 6 (can be changed or not connected at all)
+* PMS5003 pin 7 (black) and pin 7 (red) leave not connected
 
 # Applications
 
@@ -209,24 +210,24 @@ void loop(void) {
 
 And the result is (something like this):
 ```
+Port open
 pms5003 2.00
 Time of setup(): 2589
-________________
-Wait time 909
-0	Particles > 0.3 micron [/0.1L]  Level: 0.00 | diameter: 0.30
-0	Particles > 0.5 micron [/0.1L]  Level: 0.00 | diameter: 0.50
-0	Particles > 1.0 micron [/0.1L]  Level: 0.00 | diameter: 1.00
-0	Particles > 2.5 micron [/0.1L]  Level: 0.00 | diameter: 2.50
-0	Particles > 5.0 micron [/0.1L]  Level: 0.00 | diameter: 5.00
-0	Particles > 10. micron [/0.1L]  Level: 0.00 | diameter: 10.00
 _________________
-Wait time 912
-8817	Particles > 0.3 micron [/0.1L]  Level: 8.94 | diameter: 0.30
-2539	Particles > 0.5 micron [/0.1L]  Level: 8.86 | diameter: 0.50
-2406	Particles > 1.0 micron [/0.1L]  Level: 9.46 | diameter: 1.00
-1	Particles > 2.5 micron [/0.1L]  Level: 6.91 | diameter: 2.50
-0	Particles > 5.0 micron [/0.1L]  Level: 0.00 | diameter: 5.00
-0	Particles > 10. micron [/0.1L]  Level: 0.00 | diameter: 10.00
+Wait time 906
+27	PM1.0, CF=1 [micro g/m3]  | diameter: 1.00
+34	PM2.5, CF=1 [micro g/m3]  | diameter: 2.50
+35	PM10.  CF=1 [micro g/m3]  | diameter: 10.00
+23	PM1.0 [micro g/m3]  | diameter: 1.00
+31	PM2.5 [micro g/m3]  | diameter: 2.50
+35	PM10. [micro g/m3]  | diameter: 10.00
+8760	Particles > 0.3 micron [/0.1L]  | diameter: 0.30
+1780	Particles > 0.5 micron [/0.1L]  | diameter: 0.50
+70	Particles > 1.0 micron [/0.1L]  | diameter: 1.00
+18	Particles > 2.5 micron [/0.1L]  | diameter: 2.50
+1	Particles > 5.0 micron [/0.1L]  | diameter: 5.00
+1	Particles > 10. micron [/0.1L]  | diameter: 10.00
+37120	Reserved_0 [???]  | diameter: 0.00
 ```
 
 ## More about the example
@@ -291,7 +292,8 @@ There are two aspects of PMS5003 state:
 * sleeping/awoken
 * passive/active
 
-Both can be examined using `isModeActive()`/`isModeSleep()`. Please note, that result value is a tristate logic `tribool`: Yes / No / I don't know. Please refer to [boost.tribool library description](https://www.boost.org/doc/libs/1_67_0/doc/html/tribool.html)
+Both can be examined using `isModeActive()`/`isModeSleep()`. Please note, that result value is a tristate logic `tribool`: Yes / No / I don't know.  
+Please refer to [myArduinoLibrary](https://github.com/jbanaszczyk/ArduinoLibraries). It is Arduino port of [boost.tribool library description](https://www.boost.org/doc/libs/1_67_0/doc/html/tribool.html)
 
 Please note, that it is possible, that Arduino was restarted for any reason, but PMS5003 was set in a strange state and it was not restarted. It is the reason, that initial states of PMS5003 is "I don't know"
 
@@ -513,7 +515,6 @@ There are at least two possible solutions:
 
 By the way: if you are not sure if everything was properly initialized - execute `begin()` manually and check the result.
 
-
 ##### C/Arduino way
 
 * [examples\p01basic\p01basic.ino](https://github.com/jbanaszczyk/pms5003/blob/master/examples/p01basic/p01basic.ino)
@@ -552,7 +553,69 @@ void setup(void) {
     if (!pms->initialized()) {
 ```
 
-**Which one is better?** C/Arduino way and using `begin()` where it is needed leads to smaller code size and is closer to Arduino programming style.
+#####  **Which one is better?** 
+
+C/Arduino way using `begin()` is closer to Arduino programming style.  
+In my opinion: C++ is closer to modern programming style.
+
+#### ISO cleanliness levels
+
+`particles` view provides support for ISO 14644-1 classification of air cleanliness levels.
+
+Please refer to `p03cppStyle.ino`
+
+The code (`loop()` function only):
+```C++
+void loop(void) {
+
+    static auto lastRead = millis();
+    pmsx::PmsData data;
+    auto status = pms->read(data);
+
+    switch (status) {
+    case pmsx::PmsStatus::OK: {
+        Serial.println("_________________");
+        const auto newRead = millis();
+        Serial.print("Wait time ");
+        Serial.println(newRead - lastRead);
+        lastRead = newRead;
+
+        auto view = data.particles;     
+        for (auto i = decltype(view.SIZE){0}; i < view.getSize(); ++i) {
+            Serial.print(view.getValue(i));
+            Serial.print("\t");
+            Serial.print(view.getName(i));
+            Serial.print(" [");
+            Serial.print(view.getMetric(i));
+            Serial.print("] ");
+            Serial.print(" Level: ");
+            Serial.print(view.getLevel(i));
+            Serial.print(" | diameter: ");
+            Serial.print(view.getDiameter(i));
+            Serial.println();
+        }
+        break;
+    }
+    case pmsx::PmsStatus::NO_DATA:
+        break;
+    default:
+        Serial.print("!!! Pms error: ");
+        Serial.println(status.getErrorMsg());
+    }}
+```
+
+and the example of the result:
+
+```
+_________________
+Wait time 906
+1875	Particles > 0.3 micron [/0.1L]  Level: 8.27 | diameter: 0.30
+505	Particles > 0.5 micron [/0.1L]  Level: 8.16 | diameter: 0.50
+62	Particles > 1.0 micron [/0.1L]  Level: 7.87 | diameter: 1.00
+7	Particles > 2.5 micron [/0.1L]  Level: 7.75 | diameter: 2.50
+1	Particles > 5.0 micron [/0.1L]  Level: 7.53 | diameter: 5.00
+0	Particles > 10. micron [/0.1L]  Level: 0.00 | diameter: 10.00
+```
 
 # Final notes
 

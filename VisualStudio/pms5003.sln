@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27428.2043
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "p01basic", "..\Examples\p01basic\p01basic.vcxproj", "{C5F80730-F44F-4478-BDAE-6634EFC2CA88}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "p01basic", "..\examples\p01basic\p01basic.vcxproj", "{C5F80730-F44F-4478-BDAE-6634EFC2CA88}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "p02cStyle", "..\Examples\p02cStyle\p02cStyle.vcxproj", "{CCE141C3-A3F2-4A13-9904-A96D3404B3E7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "p02cStyle", "..\examples\p02cStyle\p02cStyle.vcxproj", "{CCE141C3-A3F2-4A13-9904-A96D3404B3E7}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "p03cppStyle", "..\Examples\p03cppStyle\p03cppStyle.vcxproj", "{3CA28695-F64F-459D-9157-144959DF9D40}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "p03cppStyle", "..\examples\p03cppStyle\p03cppStyle.vcxproj", "{3CA28695-F64F-459D-9157-144959DF9D40}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D37D9665-AF28-4D8B-8809-6E0784ACF1AE}"
 	ProjectSection(SolutionItems) = preProject
@@ -21,7 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\src\tribool.h = ..\src\tribool.h
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "p04usingPmsx", "..\Examples\p04usingPmsx\p04usingPmsx.vcxproj", "{788D1C4B-3DA4-41C8-B4F9-53BC5137F708}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "p04usingPmsx", "..\examples\p04usingPmsx\p04usingPmsx.vcxproj", "{788D1C4B-3DA4-41C8-B4F9-53BC5137F708}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
