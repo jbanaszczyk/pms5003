@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 #include <tribool.h>
+#include <compact_optional.h>
 #include <pmsConfig.h>
 #include <pmsSerial.h>
 
@@ -229,45 +230,6 @@ namespace pmsx {
     class Pms {
     private:
 
-    	template <typename T, T NullValue>
-        class compact_optional {
-        private:
-            T storage;
-        public:
-            compact_optional() : storage(NullValue) { }
-            explicit compact_optional(T storage) : storage(storage) { }
-
-            void unSet() {
-                storage = NullValue;
-            }
-
-            T& operator=(const T& other) {
-                storage = other;
-                return storage;
-            }
-
-            bool hasValue() const {
-                return storage != NullValue;
-            }
-
-            explicit operator bool() const {
-                return hasValue();
-            }
-
-            T getValue() {
-                return storage;
-            }
-
-            operator T() const {
-                return storage;
-            }
-
-            const T& operator->() const {
-                return storage;
-            }
-
-        };
-
         bool dataReceived;
         bool dataSent;
 
@@ -297,7 +259,7 @@ namespace pmsx {
         }
 
     private:
-        using optionalPin_t = compact_optional<uint8_t, UINT8_MAX>;
+        using optionalPin_t = jb::logic::compact_optional<uint8_t, UINT8_MAX>;
         optionalPin_t pinSleepMode;
         optionalPin_t pinReset;
 
@@ -325,7 +287,7 @@ namespace pmsx {
         static constexpr auto BAUD_RATE               = 9600U; // used during begin()
         static constexpr unsigned long RESET_DURATION = 33U; // See doHwReset()
 
-        compact_optional<IPmsSerial*, nullptr> pmsSerial;
+        jb::logic::compact_optional<IPmsSerial*, nullptr> pmsSerial;
 
     public:
         static constexpr decltype(timeout) TIMEOUT_PASSIVE = 68U;  // Transfer time of 1start + 32data + 1stop using 9600bps is 33 usec. TIMEOUT_PASSIVE could be at least 34, Value of 68 is an arbitrary doubled

@@ -12,6 +12,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D37D9665-AF28-4D8B-8809-6E0784ACF1AE}"
 	ProjectSection(SolutionItems) = preProject
 		..\API.md = ..\API.md
+		..\src\compact_optional.h = ..\src\compact_optional.h
 		..\Compatibility.md = ..\Compatibility.md
 		..\src\pms.h = ..\src\pms.h
 		..\src\pmsConfig.h = ..\src\pmsConfig.h
