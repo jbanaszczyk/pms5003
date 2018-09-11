@@ -36,7 +36,7 @@ using __uint24 = uint32_t;
 
 namespace pmsx {
 
-	constexpr char pmsxApiVersion[] = "pms5003 2.00";
+	constexpr char pmsxApiVersion[] = "pms5003 2.1";
 
 	typedef uint16_t pmsData_t;
 
