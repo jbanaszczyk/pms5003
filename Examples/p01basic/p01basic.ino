@@ -14,6 +14,14 @@ pmsx::Pms pms(&pmsSerial);
 //   * PMS5003 Pin 3 : Digital pin 7 (can be changed or not connected at all)
 //   * PMS5003 Pin 6 : Digital pin 6 (can be changed or not connected at all)
 
+// if PMS5003 Pin 3  and PMS5003 Pin 3 are not connected
+// constexpr uint8_t pinReset = pmsx::Pms::pinNone;
+// constexpr uint8_t pinSleepMode = pmsx::Pms::pinNone;
+
+// if PMS5003 Pin 3  and PMS5003 Pin 3 are connected
+constexpr uint8_t pinReset = 6;
+constexpr uint8_t pinSleepMode = 7;
+
 ////////////////////////////////////////
 
 void setup(void) {
@@ -26,8 +34,8 @@ void setup(void) {
         return;
     }
 
-    pms.setPinReset(6);
-    pms.setPinSleepMode(7);
+	pms.setPinReset(pinReset);
+	pms.setPinSleepMode(pinSleepMode);
 
     if (!pms.write(pmsx::PmsCmd::CMD_RESET)) {
         pms.write(pmsx::PmsCmd::CMD_SLEEP);
