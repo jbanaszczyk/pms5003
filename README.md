@@ -556,7 +556,7 @@ void setup(void) {
 #####  **Which one is better?** 
 
 C/Arduino way using `begin()` is closer to Arduino programming style.  
-In my opinion: C++ is closer to modern programming style.
+In my opinion: C++ way is closer to modern programming style.
 
 #### ISO cleanliness levels
 

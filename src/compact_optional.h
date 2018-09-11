@@ -14,6 +14,8 @@ namespace jb {
 		private:
 			T storage;
 		public:
+			static constexpr T none = NullValue;
+
 			compact_optional() : storage(NullValue) { }
 			explicit compact_optional(T storage) : storage(storage) { }
 
