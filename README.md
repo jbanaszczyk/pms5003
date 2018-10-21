@@ -23,7 +23,7 @@ pms5003 library is distributed under [Boost Software License 1.0 (BSL-1.0)](http
 
 ### What is new?
 
-Release 2.0 brings a lot of changes and improvements:
+Release 2.1 brings a lot of changes and improvements:
 
 * API contract (class names and methods) is completely rewritten. It is not compatible with v1.0. Sorry :(
 * Minor bugs are fixed (nothing important, release 1.0 should be assumed as stable).
@@ -210,7 +210,7 @@ void loop(void) {
 And the result is (something like this):
 ```
 Port open
-pms5003 2.00
+pms5003 2.1
 Time of setup(): 2589
 _________________
 Wait time 906
