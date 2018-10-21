@@ -1,5 +1,5 @@
-#ifndef _LIBRARIES_TRIBOOL_H_
-#define _LIBRARIES_TRIBOOL_H_
+#ifndef _JB_LIBRARIES_TRIBOOL_H_
+#define _JB_LIBRARIES_TRIBOOL_H_
 
 // Class contains Arduino port of Boost.Tribool
 // http://www.boost.org/doc/libs/1_67_0/doc/html/tribool.html

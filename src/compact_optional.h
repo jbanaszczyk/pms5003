@@ -1,5 +1,5 @@
-#ifndef _LIBRARIES_COMPACT_OPTIONAL_H_
-#define _LIBRARIES_COMPACT_OPTIONAL_H_
+#ifndef _JB_LIBRARIES_COMPACT_OPTIONAL_H_
+#define _JB_LIBRARIES_COMPACT_OPTIONAL_H_
 
 // Class contains Arduino implementation of compact_optional template
 //
