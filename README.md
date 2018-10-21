@@ -1,8 +1,8 @@
 [![download](https://img.shields.io/badge/current-download-brightgreen.svg)](https://github.com/jbanaszczyk/pms5003/archive/master.zip)
-[![Version](https://img.shields.io/badge/release-2.0-brightgreen.svg)](https://github.com/jbanaszczyk/pms5003/releases)
+[![Version](https://img.shields.io/badge/release-2.1-brightgreen.svg)](https://github.com/jbanaszczyk/pms5003/releases)
 [![Platform](https://img.shields.io/badge/platform-arduino-blue.svg)](https://www.arduino.cc/)
 [![Language](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)
-[![Standard](https://img.shields.io/badge/c%2B%2B-11/14-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
+[![Standard](https://img.shields.io/badge/c%2B%2B-11-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
 [![License](https://img.shields.io/badge/license-BSL-blue.svg)](https://www.boost.org/LICENSE_1_0.txt)
 
 # pms5003
