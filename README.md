@@ -75,7 +75,6 @@ For most [Plantover](http://www.plantower.com) sensors probably it is an easy ta
 * [#18](/../../issues/18) `isWorking()` should return `tribool`
 * [#19](/../../issues/19) `write(CMD_WAKEUP)` should not delay if already awoken
 * [#20](/../../issues/20) `write()` multiple commands sequentially
-* [#21](/../../issues/21) Use PROGMEM to store some static data (mostly strings)
 * Support for platforms
   * [#22](/../../issues/22) PlatformIO
   * [#23](/../../issues/23) CLion
