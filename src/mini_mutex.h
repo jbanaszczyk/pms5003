@@ -10,11 +10,35 @@
 
 namespace jb {
     namespace threads {
+
         using namespace jb::logic;
+
+        class mutex {
+        public:
+            mutex(const mutex &) = delete;
+            mutex & operator = (const mutex &) = delete;
+            mutex() : unlocked(true) {};
+
+            bool try_lock() {
+                static_assert (sizeof(unlocked) == 1, "locked : expected single byte");
+                bool result;
+                ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+                    result = unlocked;
+                    unlocked = false;
+                }
+                return result;
+            }
+
+            void unlock() {
+                unlocked = true;
+            }
+
+        public:
+            volatile bool unlocked;
+        };
 
         template <typename T = uint8_t, T LOCKED = T{ 0xC3 }, T UNLOCKED = T{ 0x3C } >
         class safe_mutex {
-
         public:
             safe_mutex(const safe_mutex&) = delete;
             safe_mutex& operator = (const safe_mutex &) = delete;
@@ -53,33 +77,6 @@ namespace jb {
                 return (!lhs) ^ (!rhs);
             }
         };
-
-        class mutex {
-
-        public:
-            mutex(const mutex &) = delete;
-            mutex & operator = (const mutex &) = delete;
-            mutex() : unlocked(true) {};
-
-            bool try_lock() {
-                static_assert (sizeof(unlocked) == 1, "locked : expected single byte");
-                bool result;
-                ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-                    result = unlocked;
-                    unlocked = false;
-                }
-                return result;
-            }
-
-            void unlock() {
-                unlocked = true;
-            }
-
-
-        public:
-            volatile bool unlocked;
-        };
-
     }
 }
 
