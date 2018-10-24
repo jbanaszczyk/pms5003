@@ -14,6 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\API.md = ..\API.md
 		..\src\compact_optional.h = ..\src\compact_optional.h
 		..\Compatibility.md = ..\Compatibility.md
+		..\src\mini_mutex.h = ..\src\mini_mutex.h
 		..\src\pms.h = ..\src\pms.h
 		..\src\pmsConfig.h = ..\src\pmsConfig.h
 		..\src\pmsSerial.h = ..\src\pmsSerial.h
