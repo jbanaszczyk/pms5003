@@ -154,7 +154,7 @@ namespace pmsx {
 					5.0f,
 					10.0f,
 
-					0.0f
+					NAN
 				};
 				return DIAMETERS[min(Ofset + index, static_cast<decltype(Ofset + index)>(_countof(DIAMETERS)))];
 			}
