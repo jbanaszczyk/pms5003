@@ -5,13 +5,19 @@
 // Use one of:
 // it depends on Serial Library (and serial pin connection)
 
+#if defined ESP8266
+#define PMS_SOFTWARESERIAL
+#else
 #define PMS_ALTSOFTSERIAL
+#endif
 
 #if defined PMS_ALTSOFTSERIAL
 // Install https://github.com/DrDiettrich/AltSoftSerial.git)
 #include <pmsSerialAltSoftSerial.h>
+#elif defined PMS_SOFTWARESERIAL
+#include <pmsSerialSoftwareSerial.h>
 #else
-#error "At least one of: [ PMS_ALTSOFTSERIAL ] have to be defined in pmsConfig.h"
+#error "At least one of: [ PMS_ALTSOFTSERIAL PMS_SOFTWARESERIAL ] have to be defined in pmsConfig.h"
 #endif
 
 ////////////////////////////////////////////
