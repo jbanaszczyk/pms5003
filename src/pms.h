@@ -32,6 +32,12 @@ char(*__countof_helper(_CountofType(&_Array)[_SizeOfArray]))[_SizeOfArray];
 using __uint24 = uint32_t;
 #endif
 
+#if defined ESP8266
+#define MIN_FUNC _min
+#else
+#define MIN_FUNC min
+#endif
+
 ////////////////////////////////////////
 
 namespace pmsx {
@@ -67,7 +73,7 @@ namespace pmsx {
 				"Serial port not initialized",
 				"Status:unknown"
 			};
-			return errorMsg[min(value, _countof(errorMsg))];
+			return errorMsg[MIN_FUNC(value, _countof(errorMsg))];
 		}
 	};
 
